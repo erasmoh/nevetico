@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { EventBlocks, type EventPublic } from "@/components/event/blocks";
 import { RsvpForm } from "@/components/event/rsvp-form";
 import { RegistrationStatus } from "@/components/event/registration-status";
+import { ShareButtons } from "@/components/event/share-buttons";
 import { formatEventDate } from "@/lib/datetime";
 import { parseTheme, themeCss, themeModeClass, themeScope } from "@/lib/theme";
 
@@ -101,6 +102,12 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
   const theme = parseTheme(rawEvent.theme);
   const scope = themeScope(eventId);
 
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const shareUrl =
+    calendar && rawEvent.slug
+      ? `${siteUrl}/c/${calendar.slug}/${rawEvent.slug}`
+      : `${siteUrl}/e/${eventId}`;
+
   return (
     <div
       data-nvt={scope}
@@ -182,6 +189,16 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
                 <RsvpForm eventId={eventId} user={userProfile} />
               )}
             </div>
+
+            {rawEvent.status === "published" ? (
+              <div className="mt-4 border-t border-border pt-4">
+                <ShareButtons
+                  eventId={eventId}
+                  url={shareUrl}
+                  title={rawEvent.title}
+                />
+              </div>
+            ) : null}
           </div>
         </aside>
       </div>
