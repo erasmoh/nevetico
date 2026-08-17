@@ -9,7 +9,12 @@ import { z } from "zod";
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const eventSchema = z.object({
-  calendar_id: z.uuid(),
+  calendar_id: z
+    .string()
+    .uuid()
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => (v && v.trim() ? v : null)),
   title: z.string().min(2).max(120),
   slug: z
     .string()
@@ -85,7 +90,7 @@ export async function createEvent(
   const endsAt = d.ends_at ? toTimestamptzString(d.ends_at, d.timezone) : null;
 
   const { data: event, error } = await supabase.rpc("create_event", {
-    p_calendar_id: d.calendar_id,
+    p_calendar_id: (d.calendar_id ?? null) as string,
     p_slug: slug,
     p_title: d.title,
     p_starts_at: startsAt,
@@ -102,7 +107,13 @@ export async function createEvent(
   });
   if (error) {
     if (error.code === "23505") {
-      return { errors: { slug: "Ya existe un evento con ese slug en esta comunidad." } };
+      return {
+        errors: {
+          slug: d.calendar_id
+            ? "Ya existe un evento con ese slug en esta comunidad."
+            : "Ya tienes un evento personal con ese slug.",
+        },
+      };
     }
     return { error: error.message };
   }

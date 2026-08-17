@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -35,25 +36,31 @@ export function UserMenu({
         <span className="hidden sm:inline max-w-[140px] truncate">{displayName}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="truncate">{email}</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="truncate">{email}</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href="/dashboard" />}>
-          Mis eventos
-        </DropdownMenuItem>
-        <DropdownMenuItem render={<Link href="/dashboard/calendars" />}>
-          Mis comunidades
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem render={<Link href="/dashboard" />}>
+            Mis eventos
+          </DropdownMenuItem>
+          <DropdownMenuItem render={<Link href="/dashboard/calendars" />}>
+            Mis comunidades
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          disabled={pending}
-          onSelect={(e) => {
-            e.preventDefault();
-            startTransition(() => signOut());
-          }}
-          className="text-destructive focus:text-destructive"
-        >
-          Cerrar sesión
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            disabled={pending}
+            onSelect={(e) => {
+              e.preventDefault();
+              startTransition(() => signOut());
+            }}
+            className="text-destructive focus:text-destructive"
+          >
+            Cerrar sesión
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

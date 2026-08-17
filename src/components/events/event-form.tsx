@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createEvent, type EventFormState } from "@/app/actions/events";
 import { slugify } from "@/lib/slug";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Users, User } from "lucide-react";
 
 export function EventForm({
   calendars,
@@ -26,29 +27,77 @@ export function EventForm({
     createEvent,
     undefined,
   );
+  // "community" | "personal". Personal solo se ofrece si el usuario tiene
+  // comunidades (si no, todo evento es personal de facto).
+  const [scope, setScope] = useState<"community" | "personal">(
+    calendars.length > 0 ? "community" : "personal",
+  );
 
   return (
     <form action={action} className="flex flex-col gap-5">
       <input type="hidden" name="timezone" value={defaultTimezone} />
 
+      {/* Tipo de evento: comunidad o personal */}
       <div className="flex flex-col gap-2">
-        <Label htmlFor="calendar_id">Comunidad</Label>
-        <Select name="calendar_id" required>
-          <SelectTrigger id="calendar_id">
-            <SelectValue placeholder="Selecciona una comunidad" />
-          </SelectTrigger>
-          <SelectContent>
-            {calendars.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {state?.errors?.calendar_id ? (
-          <p className="text-sm text-destructive">{state.errors.calendar_id}</p>
-        ) : null}
+        <Label>Tipo de evento</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setScope("community")}
+            disabled={calendars.length === 0}
+            className={
+              "flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors " +
+              (scope === "community"
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border bg-background text-muted-foreground hover:bg-muted/50")
+            }
+          >
+            <Users className="size-4" /> De una comunidad
+          </button>
+          <button
+            type="button"
+            onClick={() => setScope("personal")}
+            className={
+              "flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors " +
+              (scope === "personal"
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border bg-background text-muted-foreground hover:bg-muted/50")
+            }
+          >
+            <User className="size-4" /> Personal
+          </button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {scope === "community"
+            ? "El evento se publica dentro de una comunidad y aparece en su calendario."
+            : "Un evento tuyo, sin comunidad. Se comparte con un enlace directo."}
+        </p>
       </div>
+
+      {/* Selector de comunidad (solo si scope = community) */}
+      {scope === "community" ? (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="calendar_id">Comunidad</Label>
+          <Select name="calendar_id" required>
+            <SelectTrigger id="calendar_id">
+              <SelectValue placeholder="Selecciona una comunidad" />
+            </SelectTrigger>
+            <SelectContent>
+              {calendars.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {state?.errors?.calendar_id ? (
+            <p className="text-sm text-destructive">{state.errors.calendar_id}</p>
+          ) : null}
+        </div>
+      ) : (
+        // Evento personal: no mandamos calendar_id (la action lo trata como null).
+        <input type="hidden" name="calendar_id" value="" />
+      )}
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="title">Título del evento</Label>

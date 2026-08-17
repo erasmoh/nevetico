@@ -60,6 +60,11 @@ completo y el roadmap por fases.
   `register_for_event` son `security definer` para evitar chicken-and-egg
   de RLS y condiciones de carrera en el cupo/waitlist. Los inserts directos
   en `registrations` están denegados por RLS (solo vía RPC).
+- **Eventos personales vs de comunidad**: `events.calendar_id` es nullable.
+  Si es null → evento personal (organizador = `created_by`, URL `/e/[id]`).
+  Si no es null → evento de comunidad (organizador = miembro owner/host,
+  URL `/c/[calendarSlug]/[eventSlug]`). El helper `is_event_organizer`
+  cubre ambos casos; la RLS de events y la vista pública también.
 - **Emails**: `enqueueEmail` (admin) inserta en `email_queue`; el worker
   `/api/email/process?secret=$CRON_SECRET` procesa la cola. Sin
   `RESEND_API_KEY` marca como `sent` (stub); con ella envía de verdad.

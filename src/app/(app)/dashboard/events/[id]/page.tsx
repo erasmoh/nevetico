@@ -35,14 +35,15 @@ export default async function EventDetailPage({
   const { data: event } = await supabase
     .from("events")
     .select(
-      "id, slug, title, description, starts_at, timezone, status, capacity, location_type, venue_name, address, online_url, calendar:calendars(slug, name)",
+      "id, slug, title, description, starts_at, timezone, status, capacity, location_type, venue_name, address, online_url, calendar_id, calendar:calendars(slug, name)",
     )
     .eq("id", id)
     .maybeSingle();
 
-  if (!event || !event.calendar) notFound();
+  if (!event) notFound();
+  const calendar = event.calendar as { slug: string; name: string } | null;
 
-  // Verificar que el usuario es organizador de la comunidad.
+  // Verificar que el usuario es organizador (comunidad o creador del personal).
   const { data: isMember } = await supabase.rpc("is_event_organizer", {
     ev_id: id,
   });
@@ -61,7 +62,9 @@ export default async function EventDetailPage({
 
   const publicUrl =
     event.status === "published"
-      ? `/c/${event.calendar.slug}/${event.slug}`
+      ? calendar?.slug
+        ? `/c/${calendar.slug}/${event.slug}`
+        : `/e/${event.id}`
       : undefined;
 
   return (
@@ -72,9 +75,13 @@ export default async function EventDetailPage({
           <Badge variant={event.status === "published" ? "default" : "secondary"}>
             {statusLabel(event.status)}
           </Badge>
+          {event.calendar_id === null ? (
+            <Badge variant="outline">Personal</Badge>
+          ) : null}
         </div>
         <p className="text-sm text-muted-foreground">
-          {formatEventDate(event.starts_at, event.timezone)} · {event.calendar.name}
+          {formatEventDate(event.starts_at, event.timezone)} ·{" "}
+          {calendar?.name ?? "Evento personal"}
         </p>
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/dashboard/events/${id}/edit`} />}>

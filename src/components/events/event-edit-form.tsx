@@ -22,7 +22,7 @@ export function EventEditForm({
 }: {
   eventId: string;
   event: {
-    calendar_id: string;
+    calendar_id: string | null;
     title: string;
     slug: string;
     description: string | null;
@@ -46,7 +46,7 @@ export function EventEditForm({
 
   return (
     <form action={action} className="flex flex-col gap-5">
-      <input type="hidden" name="calendar_id" value={event.calendar_id} />
+      <input type="hidden" name="calendar_id" value={event.calendar_id ?? ""} />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="title">Título</Label>

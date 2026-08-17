@@ -3,22 +3,16 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { EventPublicView } from "@/components/event/event-public-view";
 
+// URL pública de eventos personales (sin comunidad): /e/[id]
 export async function generateMetadata({
   params,
-}: PageProps<"/c/[calendarSlug]/[eventSlug]">): Promise<Metadata> {
-  const { calendarSlug, eventSlug } = await params;
+}: PageProps<"/e/[id]">): Promise<Metadata> {
+  const { id } = await params;
   const supabase = await createClient();
-  const { data: cal } = await supabase
-    .from("calendars")
-    .select("id")
-    .eq("slug", calendarSlug)
-    .maybeSingle();
-  if (!cal) return { title: "Evento no encontrado" };
   const { data: ev } = await supabase
     .from("events")
     .select("title, description, status")
-    .eq("calendar_id", cal.id)
-    .eq("slug", eventSlug)
+    .eq("id", id)
     .maybeSingle();
   if (!ev || ev.status !== "published")
     return { title: "Evento no encontrado" };
@@ -29,24 +23,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function EventPage({
+export default async function PersonalEventPage({
   params,
-}: PageProps<"/c/[calendarSlug]/[eventSlug]">) {
-  const { calendarSlug, eventSlug } = await params;
+}: PageProps<"/e/[id]">) {
+  const { id } = await params;
+  // Validar formato UUID para no golpear la DB con cualquier string.
+  const uuidRe =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRe.test(id)) notFound();
+
   const supabase = await createClient();
-
-  const { data: calendar } = await supabase
-    .from("calendars")
-    .select("id")
-    .eq("slug", calendarSlug)
-    .maybeSingle();
-  if (!calendar) notFound();
-
   const { data: event } = await supabase
     .from("events")
     .select("id")
-    .eq("calendar_id", calendar.id)
-    .eq("slug", eventSlug)
+    .eq("id", id)
     .maybeSingle();
   if (!event) notFound();
 

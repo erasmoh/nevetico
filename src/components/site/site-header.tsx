@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { UserMenu } from "./user-menu";
+import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
 
 export async function SiteHeader() {
@@ -23,13 +24,14 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-bold shadow-sm">
             N
           </span>
           <span>Nevetico</span>
         </Link>
 
         <nav className="flex items-center gap-2">
+          <ThemeToggle />
           {user ? (
             <UserMenu displayName={displayName ?? user.email ?? "Cuenta"} email={user.email ?? ""} />
           ) : (

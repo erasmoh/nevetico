@@ -198,7 +198,7 @@ export type Database = {
       events: {
         Row: {
           address: string | null
-          calendar_id: string
+          calendar_id: string | null
           capacity: number | null
           cover_url: string | null
           created_at: string
@@ -218,7 +218,7 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          calendar_id: string
+          calendar_id?: string | null
           capacity?: number | null
           cover_url?: string | null
           created_at?: string
@@ -238,7 +238,7 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          calendar_id?: string
+          calendar_id?: string | null
           capacity?: number | null
           cover_url?: string | null
           created_at?: string
@@ -476,7 +476,7 @@ export type Database = {
         }
         Returns: {
           address: string | null
-          calendar_id: string
+          calendar_id: string | null
           capacity: number | null
           cover_url: string | null
           created_at: string

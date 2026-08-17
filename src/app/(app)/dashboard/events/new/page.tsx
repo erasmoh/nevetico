@@ -31,30 +31,13 @@ export default async function NewEventPage() {
     .map((m) => m.calendar)
     .filter((c): c is NonNullable<typeof c> => c !== null);
 
-  if (calendars.length === 0) {
-    return (
-      <Card className="mx-auto max-w-lg">
-        <CardHeader>
-          <CardTitle>Necesitas una comunidad</CardTitle>
-          <CardDescription>
-            Crea una comunidad primero; los eventos pertenecen a una comunidad.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button nativeButton={false} render={<Link href="/dashboard/calendars/new" />}>
-            Crear comunidad
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="mx-auto max-w-2xl">
       <CardHeader>
         <CardTitle>Nuevo evento</CardTitle>
         <CardDescription>
-          Crea un evento para tu comunidad. Puedes dejarlo en borrador o publicarlo.
+          Crea un evento para una comunidad o un evento personal. Puedes
+          dejarlo en borrador o publicarlo.
         </CardDescription>
       </CardHeader>
       <CardContent>
