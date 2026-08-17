@@ -8,6 +8,7 @@ import {
   fireAutomation,
   loadAutomationsByTrigger,
 } from "@/lib/email/automation-engine";
+import { triggerWebhooks } from "@/app/actions/api-settings";
 import { z } from "zod";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -225,8 +226,15 @@ export async function setEventStatus(
             registration: null,
           });
         }
+        // Webhook: event.published
+        await triggerWebhooks(row.calendar_id, "event.published", {
+          event_id: row.id,
+          event_title: row.title,
+          event_slug: row.slug,
+          starts_at: row.starts_at,
+        });
       } catch (err) {
-        console.error("[automations] event_published failed:", err);
+        console.error("[automations/webhooks] event_published failed:", err);
       }
     }
   }

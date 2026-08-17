@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EventActions } from "@/components/events/event-actions";
+import { IssueCertificatesButton } from "@/components/events/issue-certificates-button";
 import { QrCodeIcon, Pencil, Download, Palette } from "lucide-react";
 
 export const metadata = { title: "Gestión del evento" };
@@ -95,6 +96,10 @@ export default async function EventDetailPage({
           </Button>
           <Button size="sm" variant="outline" nativeButton={false} render={<a href={`/dashboard/events/${id}/export`} />}>
             <Download className="size-4" /> Exportar CSV
+          </Button>
+          <IssueCertificatesButton eventId={id} />
+          <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/dashboard/events/${id}/cfp`} />}>
+            CFP
           </Button>
         </div>
         <EventActions eventId={id} status={event.status} publicUrl={publicUrl} />

@@ -78,6 +78,7 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
   const goingCount = count ?? 0;
 
   const eventPublic: EventPublic = {
+    id: eventId,
     slug: rawEvent.slug ?? undefined,
     title: rawEvent.title,
     description: rawEvent.description,

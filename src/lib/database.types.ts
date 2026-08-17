@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          calendar_id: string
+          created_at: string
+          id: string
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+        }
+        Insert: {
+          calendar_id: string
+          created_at?: string
+          id?: string
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+        }
+        Update: {
+          calendar_id?: string
+          created_at?: string
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           key: string
@@ -161,6 +202,166 @@ export type Database = {
           {
             foreignKeyName: "calendars_owner_id_fkey"
             columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      certificates: {
+        Row: {
+          email: string
+          event_id: string
+          id: string
+          issued_at: string
+          issued_by: string | null
+          name: string | null
+          registration_id: string | null
+          token: string
+          user_id: string | null
+        }
+        Insert: {
+          email: string
+          event_id: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          name?: string | null
+          registration_id?: string | null
+          token?: string
+          user_id?: string | null
+        }
+        Update: {
+          email?: string
+          event_id?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          name?: string | null
+          registration_id?: string | null
+          token?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificates_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificates_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfp_proposals: {
+        Row: {
+          abstract: string
+          created_at: string
+          duration_minutes: number | null
+          event_id: string
+          format: string | null
+          id: string
+          speaker_bio: string | null
+          speaker_email: string
+          speaker_link: string | null
+          speaker_name: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          abstract: string
+          created_at?: string
+          duration_minutes?: number | null
+          event_id: string
+          format?: string | null
+          id?: string
+          speaker_bio?: string | null
+          speaker_email: string
+          speaker_link?: string | null
+          speaker_name: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          abstract?: string
+          created_at?: string
+          duration_minutes?: number | null
+          event_id?: string
+          format?: string | null
+          id?: string
+          speaker_bio?: string | null
+          speaker_email?: string
+          speaker_link?: string | null
+          speaker_name?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfp_proposals_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfp_votes: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          proposal_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          proposal_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          proposal_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfp_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "cfp_proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfp_votes_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -749,6 +950,60 @@ export type Database = {
           },
         ]
       }
+      sponsor_stats: {
+        Row: {
+          calendar_id: string | null
+          clicks: number
+          event_id: string
+          id: string
+          impressions: number
+          link: string | null
+          logo_url: string | null
+          sponsor_name: string
+          stat_date: string
+          updated_at: string
+        }
+        Insert: {
+          calendar_id?: string | null
+          clicks?: number
+          event_id: string
+          id?: string
+          impressions?: number
+          link?: string | null
+          logo_url?: string | null
+          sponsor_name: string
+          stat_date?: string
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string | null
+          clicks?: number
+          event_id?: string
+          id?: string
+          impressions?: number
+          link?: string | null
+          logo_url?: string | null
+          sponsor_name?: string
+          stat_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_stats_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_stats_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_types: {
         Row: {
           capacity: number | null
@@ -824,6 +1079,85 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "verified_domains_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_deliveries: {
+        Row: {
+          event_type: string
+          id: string
+          payload: Json
+          response_body: string | null
+          sent_at: string
+          status_code: number | null
+          success: boolean
+          webhook_id: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          payload: Json
+          response_body?: string | null
+          sent_at?: string
+          status_code?: number | null
+          success?: boolean
+          webhook_id: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          sent_at?: string
+          status_code?: number | null
+          success?: boolean
+          webhook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhooks: {
+        Row: {
+          calendar_id: string
+          created_at: string
+          enabled: boolean
+          events: Json
+          id: string
+          secret: string
+          url: string
+        }
+        Insert: {
+          calendar_id: string
+          created_at?: string
+          enabled?: boolean
+          events?: Json
+          id?: string
+          secret?: string
+          url: string
+        }
+        Update: {
+          calendar_id?: string
+          created_at?: string
+          enabled?: boolean
+          events?: Json
+          id?: string
+          secret?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhooks_calendar_id_fkey"
             columns: ["calendar_id"]
             isOneToOne: false
             referencedRelation: "calendars"

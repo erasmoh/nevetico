@@ -7,6 +7,7 @@ import {
   fireAutomation,
   loadAutomationsByTrigger,
 } from "@/lib/email/automation-engine";
+import { triggerWebhooks } from "@/app/actions/api-settings";
 import { z } from "zod";
 
 const rsvpSchema = z.object({
@@ -124,8 +125,17 @@ export async function rsvp(
           registration: { email, name: name ?? null },
         });
       }
+      // Webhook: registration.created
+      await triggerWebhooks(ev.calendar_id, "registration.created", {
+        event_id: ev.id,
+        event_title: ev.title,
+        registration_id: registration?.id,
+        email,
+        name,
+        status: registration?.status,
+      });
     } catch (err) {
-      console.error("[automations] registration_created failed:", err);
+      console.error("[automations/webhooks] registration_created failed:", err);
     }
   }
 
