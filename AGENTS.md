@@ -68,6 +68,15 @@ completo y el roadmap por fases.
 - **Emails**: `enqueueEmail` (admin) inserta en `email_queue`; el worker
   `/api/email/process?secret=$CRON_SECRET` procesa la cola. Sin
   `RESEND_API_KEY` marca como `sent` (stub); con ella envía de verdad.
+- **SMTP con Resend (magic links reales)**: `supabase/config.toml` tiene
+  `[auth.email.smtp]` apuntando a `smtp.resend.com:465`, user `resend`,
+  pass `env(RESEND_API_KEY)`. La key vive en `.env` (raíz, gitignored) que
+  el CLI de Supabase carga al arrancar. Al cambiar la config SMTP hay que
+  `supabase stop && supabase start` (no basta `db reset`). Sin dominio
+  verificado en Resend, `admin_email = onboarding@resend.dev` SOLO entrega
+  al correo del dueño de la cuenta de Resend; para enviar a cualquier
+  asistente, verifica un dominio en Resend y cambia `admin_email` y
+  `EMAIL_FROM` a `Nevetico <no-reply@tudominio.com>`.
 
 ## Estructura
 
