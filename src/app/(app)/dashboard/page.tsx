@@ -64,14 +64,14 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground">
             Aún no tienes una comunidad. Crea una para empezar a organizar eventos.
           </p>
-          <Button className="mt-4" render={<Link href="/dashboard/calendars/new" />}>
+          <Button className="mt-4" nativeButton={false} render={<Link href="/dashboard/calendars/new" />}>
             <Plus className="size-4" /> Crear comunidad
           </Button>
         </div>
       ) : events.length === 0 ? (
         <div className="rounded-lg border border-border p-8 text-center">
           <p className="text-muted-foreground">No tienes eventos todavía.</p>
-          <Button className="mt-4" render={<Link href="/dashboard/events/new" />}>
+          <Button className="mt-4" nativeButton={false} render={<Link href="/dashboard/events/new" />}>
             <Plus className="size-4" /> Crear evento
           </Button>
         </div>
@@ -100,6 +100,7 @@ export default async function DashboardPage() {
                 <Button
                   variant="outline"
                   size="sm"
+                  nativeButton={false}
                   render={<Link href={`/c/${e.calendar.slug}/${e.slug}`} />}
                 >
                   Ver página

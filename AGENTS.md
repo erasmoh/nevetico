@@ -32,10 +32,16 @@ completo y el roadmap por fases.
   Mailpit: http://127.0.0.1:54324
 - Las claves están en `.env.local` (no se commitea). Se regeneran con
   `supabase stop && supabase start`.
-- Usuario demo (seed): `demo@nevetico.local` / `password123`, owner del
-  calendario `tech-meetup-cdmx` con un evento publicado.
-- Confirmación de email desactivada en dev (`config.toml`): signUp loguea
-  directo.
+- Usuario demo (seed): `demo@nevetico.local`, owner del calendario
+  `tech-meetup-cdmx` con un evento publicado. Se accede por **magic link**
+  (sin contraseña): en `/login` mete ese correo → revisa Mailpit
+  (http://127.0.0.1:54324) → clic en "Your sign-in link" → entra a `/dashboard`.
+- Auth es solo **magic link** (email + enlace, flujo PKCE). No hay
+  contraseña ni formulario de registro: el primer enlace crea la cuenta.
+  El `display_name` se infiere de la parte local del email (trigger
+  `handle_new_user`). Config de redirects en `supabase/config.toml`
+  (`site_url` + `additional_redirect_urls` con localhost:3000/3002 y
+  `/auth/callback`); al cambiarla hay que `supabase stop && supabase start`.
 
 ## Notas clave (gotchas)
 

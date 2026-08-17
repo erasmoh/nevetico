@@ -64,10 +64,10 @@ export default async function AppLayout({
 
         <div className="flex-1 min-w-0">
           <div className="mb-6 flex items-center justify-end gap-2">
-            <Button size="sm" variant="outline" render={<Link href="/dashboard/calendars/new" />}>
+            <Button size="sm" variant="outline" nativeButton={false} render={<Link href="/dashboard/calendars/new" />}>
               <Plus className="size-4" /> Comunidad
             </Button>
-            <Button size="sm" render={<Link href="/dashboard/events/new" />}>
+            <Button size="sm" nativeButton={false} render={<Link href="/dashboard/events/new" />}>
               <Plus className="size-4" /> Evento
             </Button>
           </div>

@@ -54,7 +54,7 @@ export function EventActions({
         </Button>
       ) : null}
       {publicUrl ? (
-        <Button size="sm" variant="ghost" render={<a href={publicUrl} target="_blank" rel="noreferrer" />}>
+        <Button size="sm" variant="ghost" nativeButton={false} render={<a href={publicUrl} target="_blank" rel="noreferrer" />}>
           Ver página pública
         </Button>
       ) : null}

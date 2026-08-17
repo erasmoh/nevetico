@@ -24,11 +24,8 @@ export default async function Home() {
           y emails transaccionales. Sin costo para organizadores de comunidad.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Button size="lg" render={<Link href="/signup" />}>
-            Empezar gratis
-          </Button>
-          <Button size="lg" variant="outline" render={<Link href="/login" />}>
-            Iniciar sesión
+          <Button size="lg" nativeButton={false} render={<Link href="/login" />}>
+            Acceder
           </Button>
         </div>
       </section>

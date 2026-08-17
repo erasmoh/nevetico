@@ -33,14 +33,9 @@ export async function SiteHeader() {
           {user ? (
             <UserMenu displayName={displayName ?? user.email ?? "Cuenta"} email={user.email ?? ""} />
           ) : (
-            <>
-              <Button variant="ghost" size="sm" render={<Link href="/login" />}>
-                Iniciar sesión
-              </Button>
-              <Button size="sm" render={<Link href="/signup" />}>
-                Crear cuenta
-              </Button>
-            </>
+            <Button size="sm" nativeButton={false} render={<Link href="/login" />}>
+              Acceder
+            </Button>
           )}
         </nav>
       </div>

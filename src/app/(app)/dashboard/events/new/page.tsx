@@ -41,7 +41,7 @@ export default async function NewEventPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button render={<Link href="/dashboard/calendars/new" />}>
+          <Button nativeButton={false} render={<Link href="/dashboard/calendars/new" />}>
             Crear comunidad
           </Button>
         </CardContent>

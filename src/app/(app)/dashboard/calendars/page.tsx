@@ -38,6 +38,7 @@ export default async function CalendarsPage() {
           <p className="text-muted-foreground">No tienes comunidades todavía.</p>
           <Button
             className="mt-4"
+            nativeButton={false}
             render={<Link href="/dashboard/calendars/new" />}
           >
             Crear comunidad

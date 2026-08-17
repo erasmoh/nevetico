@@ -1,35 +1,31 @@
-import Link from "next/link";
-import { LoginForm } from "@/components/auth/login-form";
+import { MagicLinkForm } from "@/components/auth/magic-link-form";
 
 export default async function LoginPage({
   searchParams,
-}: PageProps<"/login">) {
+}: {
+  searchParams: Promise<{ error?: string; message?: string; from?: string }>;
+}) {
   const params = await searchParams;
-  const fromSignup = params.from === "signup";
+  const hasError = params.error === "auth";
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Iniciar sesión</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Acceder</h1>
         <p className="text-sm text-muted-foreground">
-          Accede a tus eventos y comunidades.
+          Sin contraseñas. Te enviamos un enlace a tu correo.
         </p>
       </div>
 
-      {fromSignup ? (
-        <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-center text-sm text-muted-foreground">
-          Cuenta creada. Revisa tu correo si se solicita confirmación, luego
-          inicia sesión.
+      {hasError ? (
+        <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+          {params.message
+            ? `No pudimos completar el acceso: ${params.message}`
+            : "El enlace no era válido o ya se usó. Pide uno nuevo."}
         </p>
       ) : null}
 
-      <LoginForm />
-
-      <p className="text-center text-xs text-muted-foreground">
-        <Link href="/" className="hover:underline">
-          ← Volver al inicio
-        </Link>
-      </p>
+      <MagicLinkForm />
     </div>
   );
 }

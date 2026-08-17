@@ -35,7 +35,7 @@ export default async function CheckinPage({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <Button size="sm" variant="ghost" render={<Link href={`/dashboard/events/${id}`} />}>
+        <Button size="sm" variant="ghost" nativeButton={false} render={<Link href={`/dashboard/events/${id}`} />}>
           <ArrowLeft className="size-4" /> Volver al evento
         </Button>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">

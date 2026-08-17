@@ -77,13 +77,13 @@ export default async function EventDetailPage({
           {formatEventDate(event.starts_at, event.timezone)} · {event.calendar.name}
         </p>
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" render={<Link href={`/dashboard/events/${id}/edit`} />}>
+          <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/dashboard/events/${id}/edit`} />}>
             <Pencil className="size-4" /> Editar
           </Button>
-          <Button size="sm" variant="outline" render={<Link href={`/dashboard/events/${id}/checkin`} />}>
+          <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/dashboard/events/${id}/checkin`} />}>
             <QrCodeIcon className="size-4" /> Check-in
           </Button>
-          <Button size="sm" variant="outline" render={<a href={`/dashboard/events/${id}/export`} />}>
+          <Button size="sm" variant="outline" nativeButton={false} render={<a href={`/dashboard/events/${id}/export`} />}>
             <Download className="size-4" /> Exportar CSV
           </Button>
         </div>
