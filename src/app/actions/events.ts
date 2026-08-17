@@ -28,6 +28,10 @@ const eventSchema = z.object({
     .optional()
     .or(z.literal("")),
   description: z.string().max(5000).optional(),
+  cover_url: z
+    .string()
+    .url("La portada es obligatoria. Sube una imagen cuadrada y pega su URL.")
+    .min(1, "La portada es obligatoria."),
   starts_at: z.string().min(1, "La fecha de inicio es obligatoria."),
   ends_at: z.string().optional().or(z.literal("")),
   timezone: z.string().min(1),
@@ -54,6 +58,7 @@ function parseEventForm(formData: FormData) {
     title: formData.get("title"),
     slug: formData.get("slug"),
     description: formData.get("description"),
+    cover_url: formData.get("cover_url"),
     starts_at: formData.get("starts_at"),
     ends_at: formData.get("ends_at"),
     timezone: formData.get("timezone"),
@@ -108,7 +113,7 @@ export async function createEvent(
     p_online_url: d.online_url || undefined,
     p_capacity: d.capacity ?? undefined,
     p_status: d.status,
-    p_cover_url: undefined,
+    p_cover_url: d.cover_url,
   });
   if (error) {
     if (error.code === "23505") {
@@ -151,6 +156,7 @@ export async function updateEvent(
       slug,
       title: d.title,
       description: d.description ?? null,
+      cover_url: d.cover_url,
       starts_at: startsAt,
       ends_at: endsAt,
       timezone: d.timezone,

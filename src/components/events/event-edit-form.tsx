@@ -26,6 +26,7 @@ export function EventEditForm({
     title: string;
     slug: string;
     description: string | null;
+    cover_url: string | null;
     starts_at: string;
     ends_at: string | null;
     timezone: string;
@@ -72,6 +73,25 @@ export function EventEditForm({
           rows={4}
           defaultValue={event.description ?? ""}
         />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="cover_url">Portada (URL de imagen cuadrada) *</Label>
+        <Input
+          id="cover_url"
+          name="cover_url"
+          type="url"
+          required
+          defaultValue={event.cover_url ?? ""}
+          placeholder="https://…/portada.jpg"
+        />
+        <p className="text-xs text-muted-foreground">
+          Imagen cuadrada (recomendado 1200x1200). Aparece al compartir el
+          evento en redes y en la imagen de IG Stories.
+        </p>
+        {state?.errors?.cover_url ? (
+          <p className="text-sm text-destructive">{state.errors.cover_url}</p>
+        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

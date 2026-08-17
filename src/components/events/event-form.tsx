@@ -137,6 +137,24 @@ export function EventForm({
         />
       </div>
 
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="cover_url">Portada (URL de imagen cuadrada) *</Label>
+        <Input
+          id="cover_url"
+          name="cover_url"
+          type="url"
+          required
+          placeholder="https://…/portada.jpg"
+        />
+        <p className="text-xs text-muted-foreground">
+          Imagen cuadrada (recomendado 1200x1200). Aparece al compartir el
+          evento en redes y en la imagen de IG Stories.
+        </p>
+        {state?.errors?.cover_url ? (
+          <p className="text-sm text-destructive">{state.errors.cover_url}</p>
+        ) : null}
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <Label htmlFor="starts_at">Inicio</Label>
