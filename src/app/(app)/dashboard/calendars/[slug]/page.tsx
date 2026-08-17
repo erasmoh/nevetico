@@ -11,6 +11,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { parseTheme } from "@/lib/theme";
+import {
+  calendarOwnerPlan,
+  entitlementsFor,
+  PLAN_LABELS,
+  type Plan,
+} from "@/lib/entitlements";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 
 export const metadata = { title: "Ajustes de la comunidad" };
@@ -49,6 +55,10 @@ export default async function CalendarSettingsPage({
     .maybeSingle();
   if (!membership || !["owner", "host"].includes(membership.role)) notFound();
 
+  const plan = await calendarOwnerPlan(supabase, calendar.id);
+  const ent = entitlementsFor(plan);
+  const isCommunity = plan === "community";
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -69,6 +79,55 @@ export default async function CalendarSettingsPage({
           Ver página pública <ExternalLink className="size-4" />
         </Button>
       </div>
+
+      <Card className="mx-auto w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Plan {PLAN_LABELS[plan as Plan]}
+            {isCommunity ? (
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                Community
+              </span>
+            ) : null}
+          </CardTitle>
+          <CardDescription>
+            Límites actuales de esta comunidad.{" "}
+            {isCommunity
+              ? "Para subir a Pro, escríbenos (el pricing se activa pronto)."
+              : "Plan activo."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul className="grid gap-2 text-sm sm:grid-cols-2">
+            <Limit
+              label="Asistentes por evento"
+              value={ent.maxAttendeesPerEvent ?? "ilimitado"}
+            />
+            <Limit
+              label="Emails por mes"
+              value={ent.maxEmailsPerMonth ?? "ilimitado"}
+            />
+            <Limit
+              label="Hosts extra"
+              value={ent.maxExtraHosts ?? "ilimitado"}
+            />
+            <Limit
+              label="Sponsors"
+              value={
+                ent.sponsorTiersAllowed
+                  ? "logos + tiers"
+                  : `${ent.maxSponsorLogos ?? 0} logo`
+              }
+            />
+            <Limit
+              label="Dominio propio"
+              value={ent.customDomainAllowed ? "sí" : "no"}
+              blocked={isCommunity}
+            />
+            <Limit label="Powered by Nevetico" value="siempre visible" />
+          </ul>
+        </CardContent>
+      </Card>
 
       <Card className="mx-auto w-full max-w-2xl">
         <CardHeader>
@@ -118,5 +177,30 @@ export default async function CalendarSettingsPage({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function Limit({
+  label,
+  value,
+  blocked,
+}: {
+  label: string;
+  value: string | number;
+  blocked?: boolean;
+}) {
+  return (
+    <li className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
+      <span className="text-muted-foreground">{label}</span>
+      <span
+        className={
+          blocked
+            ? "font-medium text-muted-foreground line-through"
+            : "font-medium"
+        }
+      >
+        {value}
+      </span>
+    </li>
   );
 }

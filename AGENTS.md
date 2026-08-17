@@ -188,19 +188,71 @@ al alcance del organizador de la comunidad desde
   (triggers temporales). En local se pegan a mano; en prod irían en Vercel
   Cron / Supabase cron cada ~5-10 min.
 
+## Entitlements y planes (Fase 4a)
+
+Planes Community/Pro/Business **sin Stripe** — el plan se asigna manualmente
+desde el admin. El pricing se puede prender/apagar globalmente con un toggle.
+
+- **Plan por perfil** (no por calendario): `profiles.plan` +
+  `profiles.is_admin` + `profiles.max_attendees_override`. El plan efectivo
+  de un recurso de comunidad = plan del `owner_id` del calendario; el de un
+  evento personal = plan del `created_by`. Helpers SQL: `user_plan(uid)`,
+  `calendar_owner_plan(cal_id)`, `event_organizer_plan(ev_id)` (security
+  definer; todos respetan `app_settings.pricing_enabled`).
+- **Feature flag de pricing**: `app_settings` (tabla key/value jsonb, lectura
+  pública + escritura solo service_role). `pricing_enabled = false` →
+  `user_plan` devuelve `'pro'` para todos (relaja el gating sin tocar filas).
+  El toggle está en la admin UI (`/admin`).
+- **Catálogo de límites** en `src/lib/entitlements.ts` (única fuente de
+  verdad TS; los límites hardcodeados en las RPC/trigger son el espejo SQL):
+  community=100 asistentes/evento + 1000 emails/mes + 0 hosts extra + 1 logo
+  sponsor sin tiers + sin dominio propio; pro/business = ilimitado o casi.
+  "Powered by Nevetico" **siempre visible** en todos los planes. Tickets
+  pagos bloqueados hasta Fase 4b.
+- **Overrides manuales**: `events.max_attendees_override` y
+  `profiles.max_attendees_override` (nullable; gana sobre el plan-cap).
+  Límite efectivo = `min(capacity, override_evento, override_perfil, plan_cap)`.
+  Editables desde `/admin`.
+- **Enforce server-side** (lo que sí se cobra, no copy):
+  - Asistentes: `register_for_event` (RPC 0016) aplica `min(capacity,
+    override_evento, override_perfil, plan_cap)`. Si going_count >= cap →
+    waitlist.
+  - Emails/mes: `enqueueEmail` cuenta `email_queue` del calendario en el mes
+    corriente; si excede, no encola y devuelve `{ ok: false, reason:
+    'quota_exceeded' }`. `send-campaign.ts` lo respeta y suma a `skipped`.
+  - Hosts: trigger `enforce_host_limit` (0017) en `calendar_members` —
+    rechaza insert/update de rol `host` si supera el límite del plan del
+    owner (community=0, pro=10). El owner (rol `owner`) no cuenta.
+  - Sponsors: `updateBlockConfig` (action) recorta logos/tiers según el plan
+    del organizador del evento (community = 1 logo sin tiers).
+  - Dominio propio: `updateCalendarBranding` (action) rechaza setear
+    `custom_domain` si el plan del owner es community.
+- **Admin UI**: `/admin` (sin link, gated por `profiles.is_admin`): toggle de
+  pricing global, lista de perfiles (cambiar plan, override de asistentes,
+  conceder/revocar admin), lista de eventos (override de asistentes por
+  evento). Server actions en `src/app/actions/admin.ts` (verifican
+  `is_admin` + usan admin client). El proxy no reescribe `/admin` en dominios
+  propios (está en `APP_PATHS`).
+- **RLS profiles reforzada**: la policy de update impide que un usuario se
+  auto-escale de plan, se dé `is_admin` o se setee overrides (solo el admin
+  client puede mutar esas columnas).
+
 ## Estructura
 
 - `src/app/(auth)` — login/signup. `src/app/(app)` — dashboard protegido.
+  `src/app/admin` — panel global (gated por `is_admin`).
   `src/app/c/[calendarSlug]` y `/c/[calendarSlug]/[eventSlug]` — páginas
   públicas. `src/app/email/unsubscribe` — baja pública.
   `src/app/api/{email/process,email/track/*,email/preview,campaigns/process,automations/run}`
   — worker + tracking + crons.
 - `src/app/actions` — server actions (auth, calendars, events, registrations,
-  checkin, page-blocks, campaigns, segments, automations, email-domains).
+  checkin, page-blocks, campaigns, segments, automations, email-domains,
+  admin).
 - `src/lib/email` — cola, render, segmentos (resolver + tipos), motor de
   automatizaciones, tracking, variables, dominios Resend, envío de campañas.
-- `src/components/{builder,email}` — page builder + builder de email/bloques,
-  segmentos, automatizaciones, dominios.
+- `src/lib/entitlements.ts` — catálogo de límites por plan + helpers.
+- `src/components/{admin,builder,email}` — admin UI, page builder + builder
+  de email/bloques, segmentos, automatizaciones, dominios.
 - `src/lib/supabase` — clientes server/client/admin/proxy.
 - `supabase/migrations` — esquema + RLS + RPCs + grants.
 

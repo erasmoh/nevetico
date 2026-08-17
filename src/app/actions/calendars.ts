@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { DEFAULT_THEME, THEME_FONTS, THEME_PRESETS } from "@/lib/theme";
+import { calendarOwnerPlan, entitlementsFor } from "@/lib/entitlements";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -112,6 +113,29 @@ export async function updateCalendarBranding(
   }
 
   const supabase = await createClient();
+
+  // Gate de dominio propio: solo Pro+ puede setear custom_domain.
+  // Community puede *limpiar* el dominio (pasarlo a vacío) pero no asignarlo.
+  if (parsed.data.custom_domain) {
+    const { data: cal } = await supabase
+      .from("calendars")
+      .select("id, custom_domain")
+      .eq("slug", slug)
+      .maybeSingle();
+    const changingDomain = cal?.custom_domain !== parsed.data.custom_domain;
+    if (changingDomain && cal) {
+      const plan = await calendarOwnerPlan(supabase, cal.id);
+      if (!entitlementsFor(plan).customDomainAllowed) {
+        return {
+          errors: {
+            custom_domain:
+              "El dominio propio está disponible a partir del plan Pro. (Modo prueba: el pricing se activa desde el admin.)",
+          },
+        };
+      }
+    }
+  }
+
   const { error } = await supabase
     .from("calendars")
     .update({
