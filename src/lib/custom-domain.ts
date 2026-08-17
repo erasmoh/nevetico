@@ -73,8 +73,11 @@ const APP_PATHS = [
   "/login",
   "/dashboard",
   "/admin",
+  "/s",
   "/c",
   "/e",
+  "/embed",
+  "/verify",
   "/_next",
 ];
 

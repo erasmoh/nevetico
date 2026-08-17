@@ -22,6 +22,7 @@ export type PageBlockRow = {
 };
 
 export type EventPublic = {
+  id: string;
   slug?: string;
   title: string;
   description: string | null;
@@ -79,6 +80,7 @@ export function EventBlock({
     case "sponsors":
       return (
         <SponsorsBlock
+          eventId={event.id}
           title={str(cfg.title)}
           note={str(cfg.note)}
           contactUrl={str(cfg.contact_url)}

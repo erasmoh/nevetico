@@ -10,9 +10,10 @@ const logoSize: Record<string, string> = {
 };
 
 /**
- * Sponsors como ciudadano de primera clase: tiers con logos y links con UTM
- * (`utm_source=nevetico`) para que el organizador pueda medir el tráfico que
- * le manda a su patrocinador.
+ * Sponsors como ciudadano de primera clase: tiers con logos, links con UTM
+ * (`utm_source=nevetico`) para que el organizador mida el tráfico que le manda
+ * a su patrocinador, y tracking interno de impresiones + clicks vía
+ * `/api/s/track` (las stats se ven en el portal del sponsor).
  */
 function withUtm(link: string, eventSlug?: string): string {
   try {
@@ -26,13 +27,25 @@ function withUtm(link: string, eventSlug?: string): string {
   }
 }
 
+/** URL de tracking de click: registra y redirige al destino. */
+function clickTrackUrl(eventId: string, name: string, link: string): string {
+  return `/api/s/track?event=${encodeURIComponent(eventId)}&name=${encodeURIComponent(name)}&type=click&link=${encodeURIComponent(link)}`;
+}
+
+/** URL de tracking de impresión (pixel 1x1). */
+function impressionPixelUrl(eventId: string, name: string): string {
+  return `/api/s/track?event=${encodeURIComponent(eventId)}&name=${encodeURIComponent(name)}&type=impression`;
+}
+
 export function SponsorsBlock({
+  eventId,
   title,
   note,
   contactUrl,
   tiers,
   eventSlug,
 }: {
+  eventId: string;
   title?: string;
   note?: string;
   contactUrl?: string;
@@ -56,24 +69,37 @@ export function SponsorsBlock({
               {(tier.logos ?? [])
                 .filter((l) => l?.name || l?.logo_url)
                 .map((logo, j) => {
+                  const name = logo.name ?? `sponsor-${j}`;
                   const inner = logo.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={logo.logo_url}
-                      alt={logo.name ?? ""}
+                      alt={name}
                       className={`w-auto object-contain ${logoSize[tier.size ?? "md"] ?? logoSize.md}`}
                     />
                   ) : (
-                    <span className="font-medium">{logo.name}</span>
+                    <span className="font-medium">{name}</span>
+                  );
+                  // Pixel de impresión (1x1 transparente, se carga con la página).
+                  const pixel = (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={impressionPixelUrl(eventId, name)}
+                      alt=""
+                      width={1}
+                      height={1}
+                      className="absolute opacity-0"
+                      aria-hidden
+                    />
                   );
                   return (
-                    <li key={j}>
+                    <li key={j} className="relative">
                       {logo.link ? (
                         <a
-                          href={withUtm(logo.link, eventSlug)}
+                          href={clickTrackUrl(eventId, name, withUtm(logo.link, eventSlug))}
                           target="_blank"
                           rel="noopener noreferrer sponsored"
-                          title={logo.name}
+                          title={name}
                           className="block opacity-80 transition-opacity hover:opacity-100"
                         >
                           {inner}
@@ -81,6 +107,7 @@ export function SponsorsBlock({
                       ) : (
                         inner
                       )}
+                      {pixel}
                     </li>
                   );
                 })}
