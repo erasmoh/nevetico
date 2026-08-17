@@ -20,11 +20,39 @@ completo y el roadmap por fases.
 
 - `npm run dev` — Next dev (Turbopack). Si el puerto 3000 está ocupado usa
   otro (p.ej. 3002).
-- `npm run build` / `npm run typecheck` — build y typecheck.
+- `npm run build` / `npm run typecheck` — build y typecheck. **Antes de
+  `tsc --noEmit`**: borrar `tsconfig.tsbuildinfo` y `.next/cache/.tsbuildinfo`
+  si se añadieron rutas nuevas (el cache incremental se queda con un
+  `AppRoutes` stale y falla aunque `next build` pase).
 - `npm run supabase:start` / `supabase:stop` / `supabase:reset` — ciclo de
   vida del stack local. `reset` recrea la DB, aplica migraciones y el seed.
 - `npm run db:types` — regenera `src/lib/database.types.ts` desde el schema
   local. Correrlo tras cualquier cambio en migraciones.
+
+## Flujo de trabajo (Git)
+
+Cada **fase** del roadmap (`PLAN.md` §6) va en su propia rama y se mergea vía
+PR, no directo a `main`:
+
+1. Crear rama desde `main` con nombre descriptivo, p.ej.
+   `devin/faseN-<slug-corto>` (siguiendo el patrón `devin/1786935087-fase2-page-builder`
+   ya usado) o `feat/faseN-<slug>`.
+2. Trabajar, commitear por sub-pasos significativos (esquema, librerías,
+   actions, UI, verificación).
+3. Verificar: `rm -f tsconfig.tsbuildinfo && npm run typecheck && npm run build`,
+   y si toca migraciones: `npm run supabase:reset && npm run db:types`.
+4. `git push -u origin <rama>`.
+5. Abrir PR con `gh pr create` (título `Fase N: <tema>` y body con resumen +
+   plan de pruebas). **No mergear sin confirmación del usuario.**
+
+`main` solo recibe merges de estos PRs. Excepción: cambios triviales
+(docs, fix mínimo) pueden ir directo a `main` con permiso explícito.
+
+Notas:
+- Antes de empezar una fase, `git fetch --all --prune` y revisar si ya hay
+  ramas remotas (`origin/devin/...`) con trabajo previo que mergear a `main`
+  antes de arrancar la nueva.
+- El usuario decide cuándo pushear/mergear; no hacerlo sin pedirlo.
 
 ## Supabase local
 
