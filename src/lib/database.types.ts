@@ -9,6 +9,60 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      automations: {
+        Row: {
+          calendar_id: string
+          config: Json
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          id: string
+          name: string
+          steps: Json
+          trigger: string
+          updated_at: string
+        }
+        Insert: {
+          calendar_id: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          steps?: Json
+          trigger: string
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          steps?: Json
+          trigger?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automations_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_members: {
         Row: {
           calendar_id: string
@@ -141,13 +195,156 @@ export type Database = {
           },
         ]
       }
+      email_campaigns: {
+        Row: {
+          blocks: Json
+          calendar_id: string
+          created_at: string
+          created_by: string | null
+          event_id: string | null
+          id: string
+          name: string
+          preheader: string | null
+          recipient_count: number
+          scheduled_for: string | null
+          segment_id: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          blocks?: Json
+          calendar_id: string
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          name: string
+          preheader?: string | null
+          recipient_count?: number
+          scheduled_for?: string | null
+          segment_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          blocks?: Json
+          calendar_id?: string
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          name?: string
+          preheader?: string | null
+          recipient_count?: number
+          scheduled_for?: string | null
+          segment_id?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_campaigns_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_campaigns_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "segments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_events: {
+        Row: {
+          calendar_id: string | null
+          campaign_id: string | null
+          event_type: string
+          id: string
+          meta: Json
+          occurred_at: string
+          queue_id: string | null
+          url: string | null
+        }
+        Insert: {
+          calendar_id?: string | null
+          campaign_id?: string | null
+          event_type: string
+          id?: string
+          meta?: Json
+          occurred_at?: string
+          queue_id?: string | null
+          url?: string | null
+        }
+        Update: {
+          calendar_id?: string | null
+          campaign_id?: string | null
+          event_type?: string
+          id?: string
+          meta?: Json
+          occurred_at?: string
+          queue_id?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_events_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_events_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "email_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_queue: {
         Row: {
           attempts: number
+          automation_id: string | null
+          calendar_id: string | null
+          campaign_id: string | null
+          context: Json
           created_at: string
           event_id: string | null
           id: string
           last_error: string | null
+          message_id: string | null
           payload: Json
           registration_id: string | null
           scheduled_for: string
@@ -160,10 +357,15 @@ export type Database = {
         }
         Insert: {
           attempts?: number
+          automation_id?: string | null
+          calendar_id?: string | null
+          campaign_id?: string | null
+          context?: Json
           created_at?: string
           event_id?: string | null
           id?: string
           last_error?: string | null
+          message_id?: string | null
           payload?: Json
           registration_id?: string | null
           scheduled_for?: string
@@ -176,10 +378,15 @@ export type Database = {
         }
         Update: {
           attempts?: number
+          automation_id?: string | null
+          calendar_id?: string | null
+          campaign_id?: string | null
+          context?: Json
           created_at?: string
           event_id?: string | null
           id?: string
           last_error?: string | null
+          message_id?: string | null
           payload?: Json
           registration_id?: string | null
           scheduled_for?: string
@@ -192,6 +399,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "email_queue_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "automations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "email_queue_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
@@ -203,6 +431,38 @@ export type Database = {
             columns: ["registration_id"]
             isOneToOne: false
             referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_unsubscribes: {
+        Row: {
+          calendar_id: string
+          created_at: string
+          email: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          calendar_id: string
+          created_at?: string
+          email: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          calendar_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_unsubscribes_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
             referencedColumns: ["id"]
           },
         ]
@@ -411,6 +671,54 @@ export type Database = {
           },
         ]
       }
+      segments: {
+        Row: {
+          calendar_id: string
+          config: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          calendar_id: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "segments_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "segments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_types: {
         Row: {
           capacity: number | null
@@ -448,6 +756,47 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verified_domains: {
+        Row: {
+          calendar_id: string
+          created_at: string
+          domain: string
+          id: string
+          last_checked_at: string | null
+          records: Json
+          resend_id: string | null
+          status: string
+        }
+        Insert: {
+          calendar_id: string
+          created_at?: string
+          domain: string
+          id?: string
+          last_checked_at?: string | null
+          records?: Json
+          resend_id?: string | null
+          status?: string
+        }
+        Update: {
+          calendar_id?: string
+          created_at?: string
+          domain?: string
+          id?: string
+          last_checked_at?: string | null
+          records?: Json
+          resend_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verified_domains_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
             referencedColumns: ["id"]
           },
         ]

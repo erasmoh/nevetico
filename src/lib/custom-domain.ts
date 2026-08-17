@@ -69,6 +69,7 @@ export async function calendarSlugForHost(
 const APP_PATHS = [
   "/api",
   "/auth",
+  "/email",
   "/login",
   "/dashboard",
   "/c",

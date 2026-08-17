@@ -88,6 +88,35 @@ export default async function CalendarSettingsPage({
           />
         </CardContent>
       </Card>
+
+      <Card className="mx-auto w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle>Emails y comunidad</CardTitle>
+          <CardDescription>
+            Campañas, segmentos, automatizaciones y dominio verificado para esta
+            comunidad.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[
+              { href: `/dashboard/calendars/${calendar.slug}/emails`, label: "Campañas", desc: "Envía emails con bloques del page builder." },
+              { href: `/dashboard/calendars/${calendar.slug}/segments`, label: "Segmentos", desc: "Audiencias reutilizables por evento o asistencia." },
+              { href: `/dashboard/calendars/${calendar.slug}/automations`, label: "Automatizaciones", desc: "Emails automáticos al registrarse, antes y después." },
+              { href: `/dashboard/calendars/${calendar.slug}/domains`, label: "Dominio verificado", desc: "Verifica tu dominio en Resend para tus envíos." },
+            ].map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="flex flex-col gap-1 rounded-lg border border-border p-3 hover:bg-muted/40"
+              >
+                <span className="text-sm font-medium">{l.label}</span>
+                <span className="text-xs text-muted-foreground">{l.desc}</span>
+              </Link>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

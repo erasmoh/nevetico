@@ -2,28 +2,38 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/database.types";
 
-type EmailTemplate =
+export type EmailTemplate =
   | "confirmation"
   | "reminder_24h"
   | "reminder_1h"
   | "changed"
   | "thankyou"
-  | "welcome";
+  | "welcome"
+  | "campaign"
+  | "automation";
 
-/**
- * Encola un email en `email_queue`. No envía: un worker/route procesa la cola.
- * Si RESEND_API_KEY está configurado, el worker envía de verdad; si no, marca como 'sent'.
- */
-export async function enqueueEmail(args: {
+export type EnqueueEmailArgs = {
   template: EmailTemplate;
   toEmail: string;
   toName?: string | null;
   subject: string;
   eventId?: string;
   registrationId?: string;
+  campaignId?: string;
+  automationId?: string;
+  calendarId?: string;
   payload?: Record<string, unknown>;
+  /** Variables del destinatario (first_name, event_title, rsvp_url…). */
+  context?: Record<string, unknown>;
   scheduledFor?: Date;
-}) {
+};
+
+/**
+ * Encola un email en `email_queue`. No envía: un worker/route procesa la cola.
+ * Si RESEND_API_KEY está configurado, el worker envía de verdad; si no, marca
+ * como 'sent' (stub de desarrollo).
+ */
+export async function enqueueEmail(args: EnqueueEmailArgs) {
   const admin = createAdminClient();
   const scheduledFor = args.scheduledFor
     ? args.scheduledFor.toISOString()
@@ -35,7 +45,11 @@ export async function enqueueEmail(args: {
     subject: args.subject,
     event_id: args.eventId ?? null,
     registration_id: args.registrationId ?? null,
+    campaign_id: args.campaignId ?? null,
+    automation_id: args.automationId ?? null,
+    calendar_id: args.calendarId ?? null,
     payload: (args.payload ?? {}) as Json,
+    context: (args.context ?? {}) as Json,
     scheduled_for: scheduledFor,
     status: "pending",
   });

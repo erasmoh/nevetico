@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { enqueueEmail } from "@/lib/email/queue";
+import {
+  fireAutomation,
+  loadAutomationsByTrigger,
+} from "@/lib/email/automation-engine";
 import { z } from "zod";
 
 const rsvpSchema = z.object({
@@ -59,12 +63,24 @@ export async function rsvp(
   // Encolar email de confirmación
   const { data: event } = await supabase
     .from("events")
-    .select("title, starts_at, timezone, calendar:calendars(name)")
+    .select(
+      "id, slug, title, starts_at, timezone, venue_name, address, calendar_id, calendar:calendars(id, slug, name)",
+    )
     .eq("id", parsed.data.event_id)
     .maybeSingle();
 
   const ev = event as
-    | { title: string; starts_at: string; timezone: string; calendar: { name: string } | null }
+    | {
+        id: string;
+        slug: string;
+        title: string;
+        starts_at: string;
+        timezone: string;
+        venue_name: string | null;
+        address: string | null;
+        calendar_id: string | null;
+        calendar: { id: string; slug: string; name: string } | null;
+      }
     | null;
 
   await enqueueEmail({
@@ -74,6 +90,7 @@ export async function rsvp(
     subject: `Confirmado: ${ev?.title ?? "Tu evento"}`,
     eventId: parsed.data.event_id,
     registrationId: registration?.id,
+    calendarId: ev?.calendar_id ?? undefined,
     payload: {
       event_title: ev?.title,
       starts_at: ev?.starts_at,
@@ -82,6 +99,35 @@ export async function rsvp(
       status: registration?.status,
     },
   });
+
+  // Disparar automatizaciones `registration_created` (solo eventos de comunidad).
+  if (ev?.calendar_id && ev.calendar) {
+    try {
+      const automations = await loadAutomationsByTrigger(
+        ev.calendar_id,
+        "registration_created",
+      );
+      for (const a of automations) {
+        await fireAutomation(a, {
+          calendarId: ev.calendar_id,
+          calendarName: ev.calendar.name,
+          event: {
+            id: ev.id,
+            title: ev.title,
+            slug: ev.slug,
+            startsAt: ev.starts_at,
+            timezone: ev.timezone,
+            venueName: ev.venue_name,
+            address: ev.address,
+            calendarSlug: ev.calendar.slug,
+          },
+          registration: { email, name: name ?? null },
+        });
+      }
+    } catch (err) {
+      console.error("[automations] registration_created failed:", err);
+    }
+  }
 
   revalidatePath("/c/[calendarSlug]/[eventSlug]", "page");
   return { ok: true, status: registration?.status };

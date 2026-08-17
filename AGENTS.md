@@ -102,16 +102,77 @@ completo y el roadmap por fases.
   URLs https en un iframe con sandbox.
 - **Dominio propio**: `calendars.custom_domain` + `src/lib/custom-domain.ts`.
   El proxy reescribe `midominio.com/*` → `/c/<slug>/*` (cache en memoria de
-  60s). Las rutas de app (`/api`, `/auth`, `/login`, `/dashboard`, `/c`,
-  `/e`) no se reescriben.
+  60s). Las rutas de app (`/api`, `/auth`, `/email`, `/login`, `/dashboard`,
+  `/c`, `/e`) no se reescriben.
+
+## Email marketing (Fase 3)
+
+Campañas, segmentos, automatizaciones, dominios verificados y métricas — todo
+al alcance del organizador de la comunidad desde
+`/dashboard/calendars/[slug]/{emails,segments,automations,domains}`.
+
+- **Esquema** (migración `0014_email_marketing.sql`): `email_campaigns`,
+  `segments`, `automations`, `verified_domains`, `email_events`,
+  `email_unsubscribes`, + columnas en `email_queue` (`campaign_id`,
+  `automation_id`, `calendar_id`, `message_id`, `context`) y CHECK de
+  `template` ampliado con `'campaign'` y `'automation'`. RLS: owner/host del
+  calendario hace CRUD; `email_events`/`email_unsubscribes` son lectura para
+  organizadores y escritura solo `service_role`. Grants explícitos en la misma
+  migración (incluido `service_role`, que no hereda los de `0011`).
+- **Campañas**: cuerpo = array jsonb de bloques del page builder (mismo
+  `BLOCK_DEFS`). `enqueueCampaignRecipients` (`src/lib/email/send-campaign.ts`)
+  resuelve el segmento, filtra bajas y encola en `email_queue` con
+  `template='campaign'`. El cron `/api/campaigns/process?secret=$CRON_SECRET`
+  encola las programadas vencidas; "Enviar ahora" va por la action
+  `sendCampaignNow`. Vista previa real vía POST `/api/email/preview`.
+- **Segmentos**: catálogo client-safe en `src/lib/email/segment-types.ts`
+  (¡no importar de `segments.ts`, que es server-only por el admin client!).
+  El resolver (`src/lib/email/segments.ts`) usa el admin client para leer
+  registros cruzando eventos. Kinds: `event_going`, `event_registered`,
+  `event_waitlist`, `event_attended`, `event_no_show`, `calendar_members`,
+  `past_attendees`.
+- **Automatizaciones**: pipeline trigger + pasos (`send_email` con bloques,
+  `wait`). Motor en `src/lib/email/automation-engine.ts`. Triggers de evento
+  (`registration_created`, `event_published`) los disparan las actions de
+  RSVP/publish; los temporales (`reminder_24h`, `reminder_1h`, `event_ended`,
+  `no_show`) los evalúa el cron `/api/automations/run?secret=$CRON_SECRET`
+  (dedupe por `email_queue` existente). El cuerpo de cada paso se renderiza en
+  el worker (no se guarda el HTML en la fila).
+- **Render de email**: `src/lib/email/render.ts` convierte bloques a HTML de
+  email (tablas + estilos inline) + texto plano. Recibe `wrapLink`/`openPixelUrl`
+  por destinatario, así los tokens de tracking se generan fuera. Variables
+  `{first_name}`, `{event_title}`, `{rsvp_url}`, `{unsubscribe_url}`…
+  (`src/lib/email/variables.ts`).
+- **Tracking**: tokens firmados (HMAC de `queue_id`) en
+  `src/lib/email/tracking.ts` (secreto `TRACKING_SECRET` o fallback
+  `CRON_SECRET`). `/api/email/track/open` → GIF 1x1 + `email_events('opened')`
+  (dedup por queue); `/api/email/track/click?u=` → `email_events('clicked')` +
+  302 a la URL (solo http/https/mailto). `/email/unsubscribe` es pública, usa
+  admin client, inserta `email_unsubscribes` (única por calendar+email) + el
+  evento `'unsubscribed'`. El worker salta envíos a direcciones dadas de baja.
+- **Dominios verificados**: `src/lib/email/resend-domains.ts` llama a la API
+  de Resend (create/get/verify/delete). El worker usa el dominio verificado del
+  calendario como `from` (fallback `EMAIL_FROM`). Requiere `RESEND_API_KEY`;
+  sin dominio verificado, Resend solo entrega al dueño de la cuenta (ver nota
+  SMTP arriba).
+- **Crons** (todos con `x-cron-secret` o `?secret=`): `/api/email/process`
+  (cola), `/api/campaigns/process` (programadas), `/api/automations/run`
+  (triggers temporales). En local se pegan a mano; en prod irían en Vercel
+  Cron / Supabase cron cada ~5-10 min.
 
 ## Estructura
 
 - `src/app/(auth)` — login/signup. `src/app/(app)` — dashboard protegido.
   `src/app/c/[calendarSlug]` y `/c/[calendarSlug]/[eventSlug]` — páginas
-  públicas. `src/app/api/email/process` — worker.
-- `src/app/actions` — server actions (auth, calendars, events,
-  registrations, checkin).
+  públicas. `src/app/email/unsubscribe` — baja pública.
+  `src/app/api/{email/process,email/track/*,email/preview,campaigns/process,automations/run}`
+  — worker + tracking + crons.
+- `src/app/actions` — server actions (auth, calendars, events, registrations,
+  checkin, page-blocks, campaigns, segments, automations, email-domains).
+- `src/lib/email` — cola, render, segmentos (resolver + tipos), motor de
+  automatizaciones, tracking, variables, dominios Resend, envío de campañas.
+- `src/components/{builder,email}` — page builder + builder de email/bloques,
+  segmentos, automatizaciones, dominios.
 - `src/lib/supabase` — clientes server/client/admin/proxy.
 - `supabase/migrations` — esquema + RLS + RPCs + grants.
 

@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { slugify, toTimestamptzString } from "@/lib/slug";
+import {
+  fireAutomation,
+  loadAutomationsByTrigger,
+} from "@/lib/email/automation-engine";
 import { z } from "zod";
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -174,6 +178,59 @@ export async function setEventStatus(
   status: "draft" | "published" | "canceled" | "completed",
 ): Promise<void> {
   const supabase = await createClient();
+
+  // Si vamos a publicar, disparamos automatizaciones `event_published` para
+  // los eventos de comunidad (antes de actualizar, para leer datos frescos).
+  if (status === "published") {
+    const { data: ev } = await supabase
+      .from("events")
+      .select(
+        "id, slug, title, starts_at, timezone, venue_name, address, calendar_id, calendar:calendars(id, slug, name)",
+      )
+      .eq("id", eventId)
+      .maybeSingle();
+    const row = ev as
+      | {
+          id: string;
+          slug: string;
+          title: string;
+          starts_at: string;
+          timezone: string;
+          venue_name: string | null;
+          address: string | null;
+          calendar_id: string | null;
+          calendar: { id: string; slug: string; name: string } | null;
+        }
+      | null;
+    if (row?.calendar_id && row.calendar) {
+      try {
+        const automations = await loadAutomationsByTrigger(
+          row.calendar_id,
+          "event_published",
+        );
+        for (const a of automations) {
+          await fireAutomation(a, {
+            calendarId: row.calendar_id,
+            calendarName: row.calendar.name,
+            event: {
+              id: row.id,
+              title: row.title,
+              slug: row.slug,
+              startsAt: row.starts_at,
+              timezone: row.timezone,
+              venueName: row.venue_name,
+              address: row.address,
+              calendarSlug: row.calendar.slug,
+            },
+            registration: null,
+          });
+        }
+      } catch (err) {
+        console.error("[automations] event_published failed:", err);
+      }
+    }
+  }
+
   await supabase.from("events").update({ status }).eq("id", eventId);
   revalidatePath(`/dashboard/events/${eventId}`);
   revalidatePath("/dashboard");
