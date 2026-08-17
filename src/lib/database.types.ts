@@ -47,30 +47,42 @@ export type Database = {
       }
       calendars: {
         Row: {
+          cover_url: string | null
           created_at: string
+          custom_domain: string | null
           description: string | null
           id: string
+          logo_url: string | null
           name: string
           owner_id: string
           slug: string
+          theme: Json
           updated_at: string
         }
         Insert: {
+          cover_url?: string | null
           created_at?: string
+          custom_domain?: string | null
           description?: string | null
           id?: string
+          logo_url?: string | null
           name: string
           owner_id: string
           slug: string
+          theme?: Json
           updated_at?: string
         }
         Update: {
+          cover_url?: string | null
           created_at?: string
+          custom_domain?: string | null
           description?: string | null
           id?: string
+          logo_url?: string | null
           name?: string
           owner_id?: string
           slug?: string
+          theme?: Json
           updated_at?: string
         }
         Relationships: [
@@ -211,6 +223,7 @@ export type Database = {
           slug: string
           starts_at: string
           status: string
+          theme: Json
           timezone: string
           title: string
           updated_at: string
@@ -231,6 +244,7 @@ export type Database = {
           slug: string
           starts_at: string
           status?: string
+          theme?: Json
           timezone?: string
           title: string
           updated_at?: string
@@ -251,6 +265,7 @@ export type Database = {
           slug?: string
           starts_at?: string
           status?: string
+          theme?: Json
           timezone?: string
           title?: string
           updated_at?: string
@@ -281,6 +296,7 @@ export type Database = {
           id: string
           order_idx: number
           type: string
+          visible: boolean
         }
         Insert: {
           config?: Json
@@ -289,6 +305,7 @@ export type Database = {
           id?: string
           order_idx?: number
           type: string
+          visible?: boolean
         }
         Update: {
           config?: Json
@@ -297,6 +314,7 @@ export type Database = {
           id?: string
           order_idx?: number
           type?: string
+          visible?: boolean
         }
         Relationships: [
           {
@@ -439,15 +457,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_event_template: {
+        Args: { p_blocks: Json; p_event_id: string }
+        Returns: undefined
+      }
       create_calendar: {
         Args: { p_description?: string; p_name: string; p_slug: string }
         Returns: {
+          cover_url: string | null
           created_at: string
+          custom_domain: string | null
           description: string | null
           id: string
+          logo_url: string | null
           name: string
           owner_id: string
           slug: string
+          theme: Json
           updated_at: string
         }
         SetofOptions: {
@@ -489,6 +515,7 @@ export type Database = {
           slug: string
           starts_at: string
           status: string
+          theme: Json
           timezone: string
           title: string
           updated_at: string
@@ -535,6 +562,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      reorder_page_blocks: {
+        Args: { p_event_id: string; p_ids: string[] }
+        Returns: undefined
       }
     }
     Enums: {

@@ -1,11 +1,18 @@
-type AgendaItem = { time: string; title: string; speaker?: string };
+import { BlockSection } from "./section";
 
-export function AgendaBlock({ items }: { items?: AgendaItem[] }) {
-  const list = items ?? [];
+type AgendaItem = { time?: string; title?: string; speaker?: string };
+
+export function AgendaBlock({
+  title,
+  items,
+}: {
+  title?: string;
+  items?: AgendaItem[];
+}) {
+  const list = (items ?? []).filter((i) => i?.title || i?.time);
   if (list.length === 0) return null;
   return (
-    <section className="rounded-xl border border-border p-6">
-      <h2 className="mb-4 text-lg font-semibold">Agenda</h2>
+    <BlockSection title={title ?? "Agenda"}>
       <ol className="flex flex-col divide-y divide-border">
         {list.map((item, i) => (
           <li key={i} className="flex gap-4 py-3">
@@ -21,6 +28,6 @@ export function AgendaBlock({ items }: { items?: AgendaItem[] }) {
           </li>
         ))}
       </ol>
-    </section>
+    </BlockSection>
   );
 }

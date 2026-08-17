@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EventActions } from "@/components/events/event-actions";
-import { QrCodeIcon, Pencil, Download } from "lucide-react";
+import { QrCodeIcon, Pencil, Download, Palette } from "lucide-react";
 
 export const metadata = { title: "Gestión del evento" };
 
@@ -86,6 +86,9 @@ export default async function EventDetailPage({
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/dashboard/events/${id}/edit`} />}>
             <Pencil className="size-4" /> Editar
+          </Button>
+          <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/dashboard/events/${id}/design`} />}>
+            <Palette className="size-4" /> Diseño
           </Button>
           <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/dashboard/events/${id}/checkin`} />}>
             <QrCodeIcon className="size-4" /> Check-in

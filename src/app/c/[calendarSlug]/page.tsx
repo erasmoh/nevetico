@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { formatEventDate } from "@/lib/datetime";
 import { Badge } from "@/components/ui/badge";
+import { parseTheme, themeCss, themeModeClass, themeScope } from "@/lib/theme";
 
 export async function generateMetadata({
   params,
@@ -27,7 +28,7 @@ export default async function CalendarPage({
 
   const { data: calendar } = await supabase
     .from("calendars")
-    .select("id, slug, name, description")
+    .select("id, slug, name, description, theme, logo_url, cover_url")
     .eq("slug", calendarSlug)
     .maybeSingle();
   if (!calendar) notFound();
@@ -49,10 +50,37 @@ export default async function CalendarPage({
     .order("starts_at", { ascending: false })
     .limit(5);
 
+  const theme = parseTheme(calendar.theme);
+  const scope = themeScope(`cal-${calendar.slug}`);
+
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10">
+    <div
+      data-nvt={scope}
+      className={`mx-auto w-full max-w-3xl px-4 py-10 font-sans ${themeModeClass(theme)}`}
+    >
+      <style>{themeCss(scope, theme)}</style>
+      {calendar.cover_url ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={calendar.cover_url}
+          alt=""
+          className="mb-6 h-40 w-full rounded-xl object-cover sm:h-56"
+        />
+      ) : null}
       <header className="flex flex-col gap-2 border-b border-border pb-6">
-        <h1 className="text-3xl font-semibold tracking-tight">{calendar.name}</h1>
+        <div className="flex items-center gap-3">
+          {calendar.logo_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={calendar.logo_url}
+              alt={calendar.name}
+              className="size-12 rounded-lg border border-border object-cover"
+            />
+          ) : null}
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">
+            {calendar.name}
+          </h1>
+        </div>
         {calendar.description ? (
           <p className="text-muted-foreground">{calendar.description}</p>
         ) : null}

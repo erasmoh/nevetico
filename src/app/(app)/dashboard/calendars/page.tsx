@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Settings } from "lucide-react";
 
 export const metadata = { title: "Mis comunidades" };
 
@@ -63,6 +64,15 @@ export default async function CalendarsPage() {
                 </p>
               ) : null}
               <p className="mt-2 text-xs text-muted-foreground">/c/{c.slug}</p>
+              <Button
+                className="mt-3"
+                size="sm"
+                variant="outline"
+                nativeButton={false}
+                render={<Link href={`/dashboard/calendars/${c.slug}`} />}
+              >
+                <Settings className="size-4" /> Ajustes y branding
+              </Button>
             </li>
           ))}
         </ul>

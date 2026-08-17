@@ -1,4 +1,10 @@
-export function MapBlock({ query, venueName, address }: {
+export function MapBlock({
+  title,
+  query,
+  venueName,
+  address,
+}: {
+  title?: string;
   query?: string;
   venueName?: string | null;
   address?: string | null;
@@ -9,7 +15,7 @@ export function MapBlock({ query, venueName, address }: {
   return (
     <section className="overflow-hidden rounded-xl border border-border">
       <div className="flex items-center justify-between border-b border-border bg-muted/40 px-4 py-2">
-        <h2 className="text-sm font-semibold">Ubicación</h2>
+        <h2 className="font-heading text-sm font-semibold">{title ?? "Ubicación"}</h2>
         <a
           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`}
           target="_blank"

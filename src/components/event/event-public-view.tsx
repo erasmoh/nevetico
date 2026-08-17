@@ -6,6 +6,7 @@ import { EventBlocks, type EventPublic } from "@/components/event/blocks";
 import { RsvpForm } from "@/components/event/rsvp-form";
 import { RegistrationStatus } from "@/components/event/registration-status";
 import { formatEventDate } from "@/lib/datetime";
+import { parseTheme, themeCss, themeModeClass, themeScope } from "@/lib/theme";
 
 /**
  * Vista pública de un evento (comunitario o personal). Recibe el id validado
@@ -19,7 +20,7 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
   const { data: rawEvent } = await supabase
     .from("events")
     .select(
-      "id, title, description, starts_at, ends_at, timezone, location_type, venue_name, address, online_url, capacity, status, cover_url, calendar:calendars(id, slug, name)",
+      "id, slug, title, description, starts_at, ends_at, timezone, location_type, venue_name, address, online_url, capacity, status, cover_url, theme, calendar:calendars(id, slug, name)",
     )
     .eq("id", eventId)
     .maybeSingle();
@@ -41,7 +42,7 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
 
   const { data: blocks } = await supabase
     .from("page_blocks")
-    .select("id, type, order_idx, config")
+    .select("id, type, order_idx, visible, config")
     .eq("event_id", eventId)
     .order("order_idx", { ascending: true });
 
@@ -77,6 +78,7 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
   const goingCount = count ?? 0;
 
   const eventPublic: EventPublic = {
+    slug: rawEvent.slug ?? undefined,
     title: rawEvent.title,
     description: rawEvent.description,
     starts_at: rawEvent.starts_at,
@@ -95,8 +97,15 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
 
   const isFull = rawEvent.capacity != null && goingCount >= rawEvent.capacity;
 
+  const theme = parseTheme(rawEvent.theme);
+  const scope = themeScope(eventId);
+
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8">
+    <div
+      data-nvt={scope}
+      className={`mx-auto w-full max-w-5xl px-4 py-8 font-sans ${themeModeClass(theme)}`}
+    >
+      <style>{themeCss(scope, theme)}</style>
       {calendar ? (
         <p className="mb-4 text-sm text-muted-foreground">
           <Link href={`/c/${calendar.slug}`} className="hover:underline">
@@ -113,7 +122,7 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="min-w-0">
-          <EventBlocks event={eventPublic} blocks={(blocks ?? []) as never} />
+          <EventBlocks event={eventPublic} blocks={blocks ?? []} />
 
           {rawEvent.location_type !== "online" &&
           (rawEvent.venue_name || rawEvent.address) ? (

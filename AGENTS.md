@@ -78,6 +78,33 @@ completo y el roadmap por fases.
   asistente, verifica un dominio en Resend y cambia `admin_email` y
   `EMAIL_FROM` a `Nevetico <no-reply@tudominio.com>`.
 
+## Page builder y temas (Fase 2)
+
+- **Catálogo de bloques**: `src/lib/blocks.ts` define, por tipo de bloque, sus
+  campos (`FieldDef`) y defaults. El editor pinta el formulario desde ahí
+  (`src/components/builder/fields-editor.tsx`) y las server actions validan
+  el `config` contra esos campos (allowlist de claves). Para agregar un
+  bloque: entrada en `BLOCK_DEFS` + componente en
+  `src/components/event/blocks/` + case en el dispatcher `blocks/index.tsx` +
+  el tipo en el CHECK de `page_blocks.type` (migración).
+- **Temas**: `src/lib/theme.ts` (presets, fuentes, `parseTheme`, `themeCss`).
+  El tema vive en `events.theme` / `calendars.theme` (jsonb) y se aplica por
+  scope: la página pública envuelve todo en `data-nvt="<scope>"` e inyecta
+  `<style>{themeCss(scope, theme)}</style>`, así no contamina el resto de la
+  app. Las fuentes se cargan en `src/app/layout.tsx` como CSS vars
+  (`--font-sans-base`, `--font-grotesk`, `--font-display`, `--font-rounded`).
+- **Plantillas**: `src/lib/templates.ts` (meetup, conferencia, workshop,
+  hackathon). Se aplican con la RPC `apply_event_template` (borra y reinserta
+  bloques en orden). El reordenado usa `reorder_page_blocks`. Ambas son
+  `security definer` y validan `is_event_organizer`.
+- **HTML custom**: el bloque `custom` pasa por `src/lib/sanitize.ts`
+  (allowlist de etiquetas, sin scripts/estilos) y los embeds solo aceptan
+  URLs https en un iframe con sandbox.
+- **Dominio propio**: `calendars.custom_domain` + `src/lib/custom-domain.ts`.
+  El proxy reescribe `midominio.com/*` → `/c/<slug>/*` (cache en memoria de
+  60s). Las rutas de app (`/api`, `/auth`, `/login`, `/dashboard`, `/c`,
+  `/e`) no se reescriben.
+
 ## Estructura
 
 - `src/app/(auth)` — login/signup. `src/app/(app)` — dashboard protegido.
