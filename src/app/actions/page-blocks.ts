@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { blockDef } from "@/lib/blocks";
 import { templateById } from "@/lib/templates";
 import { DEFAULT_THEME, THEME_FONTS, THEME_PRESETS, type PageTheme } from "@/lib/theme";
+import { eventOrganizerPlan, entitlementsFor } from "@/lib/entitlements";
 import type { Json } from "@/lib/database.types";
 
 export type BlockActionState = { error?: string; ok?: boolean } | undefined;
@@ -135,6 +136,49 @@ export async function updateBlockConfig(
   }
 
   const supabase = await createClient();
+
+  // Gate de sponsors por plan:
+  //  - community: 1 logo total, sin tiers (aunque venga tiers en config, se ignora).
+  //  - pro/business: lista de logos + tiers.
+  if (type === "sponsors") {
+    const plan = await eventOrganizerPlan(supabase, eventId);
+    const ent = entitlementsFor(plan);
+    const tiers = Array.isArray(clean.tiers) ? (clean.tiers as unknown[]) : [];
+    if (!ent.sponsorTiersAllowed) {
+      // Aplana a un solo tier implícito con los logos (máx 1).
+      const allLogos: unknown[] = [];
+      for (const t of tiers) {
+        const logos = (t as { logos?: unknown[] })?.logos;
+        if (Array.isArray(logos)) allLogos.push(...logos);
+      }
+      const trimmedLogos = allLogos.slice(0, ent.maxSponsorLogos ?? 1);
+      clean.tiers = trimmedLogos.length
+        ? [{ name: "", size: "md", logos: trimmedLogos }]
+        : [];
+      // Si la config trae logos sueltos (sin tiers), también los limitamos.
+      if (Array.isArray(clean.logos)) {
+        clean.logos = (clean.logos as unknown[]).slice(0, ent.maxSponsorLogos ?? 1);
+      }
+    } else if (ent.maxSponsorLogos != null) {
+      // Pro con límite de logos: contamos total y recortamos.
+      let total = 0;
+      const kept: unknown[] = [];
+      for (const t of tiers) {
+        const logos = (t as { logos?: unknown[] })?.logos;
+        if (!Array.isArray(logos)) {
+          kept.push(t);
+          continue;
+        }
+        const room = Math.max(0, ent.maxSponsorLogos - total);
+        const slice = logos.slice(0, room);
+        total += slice.length;
+        kept.push({ ...(t as object), logos: slice });
+        if (total >= ent.maxSponsorLogos) break;
+      }
+      clean.tiers = kept;
+    }
+  }
+
   const { error } = await supabase
     .from("page_blocks")
     .update({ config: clean as Json })

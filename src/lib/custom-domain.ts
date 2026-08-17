@@ -72,6 +72,7 @@ const APP_PATHS = [
   "/email",
   "/login",
   "/dashboard",
+  "/admin",
   "/c",
   "/e",
   "/_next",

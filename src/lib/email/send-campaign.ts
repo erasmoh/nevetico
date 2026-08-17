@@ -80,7 +80,7 @@ export async function enqueueCampaignRecipients(
       skipped++;
       continue;
     }
-    await enqueueEmail({
+    const res = await enqueueEmail({
       template: "campaign",
       campaignId: c.id,
       calendarId: c.calendar_id,
@@ -93,7 +93,8 @@ export async function enqueueCampaignRecipients(
         first_name: r.name?.split(/\s+/)[0] ?? "",
       },
     });
-    enqueued++;
+    if (res.ok) enqueued++;
+    else skipped++; // quota_exceeded u otro fallo de encolado
   }
 
   await admin

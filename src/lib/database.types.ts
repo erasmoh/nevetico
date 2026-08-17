@@ -9,6 +9,24 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       automations: {
         Row: {
           calendar_id: string
@@ -479,6 +497,7 @@ export type Database = {
           ends_at: string | null
           id: string
           location_type: string
+          max_attendees_override: number | null
           online_url: string | null
           slug: string
           starts_at: string
@@ -500,6 +519,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           location_type?: string
+          max_attendees_override?: number | null
           online_url?: string | null
           slug: string
           starts_at: string
@@ -521,6 +541,7 @@ export type Database = {
           ends_at?: string | null
           id?: string
           location_type?: string
+          max_attendees_override?: number | null
           online_url?: string | null
           slug?: string
           starts_at?: string
@@ -592,6 +613,9 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          is_admin: boolean
+          max_attendees_override: number | null
+          plan: string
           updated_at: string
         }
         Insert: {
@@ -599,6 +623,9 @@ export type Database = {
           created_at?: string
           display_name?: string
           id: string
+          is_admin?: boolean
+          max_attendees_override?: number | null
+          plan?: string
           updated_at?: string
         }
         Update: {
@@ -606,6 +633,9 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          is_admin?: boolean
+          max_attendees_override?: number | null
+          plan?: string
           updated_at?: string
         }
         Relationships: []
@@ -810,6 +840,7 @@ export type Database = {
         Args: { p_blocks: Json; p_event_id: string }
         Returns: undefined
       }
+      calendar_owner_plan: { Args: { p_cal_id: string }; Returns: string }
       create_calendar: {
         Args: { p_description?: string; p_name: string; p_slug: string }
         Returns: {
@@ -860,6 +891,7 @@ export type Database = {
           ends_at: string | null
           id: string
           location_type: string
+          max_attendees_override: number | null
           online_url: string | null
           slug: string
           starts_at: string
@@ -877,6 +909,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      event_organizer_plan: { Args: { p_ev_id: string }; Returns: string }
       event_visible_to_current_user: {
         Args: { ev_id: string }
         Returns: boolean
@@ -916,6 +949,7 @@ export type Database = {
         Args: { p_event_id: string; p_ids: string[] }
         Returns: undefined
       }
+      user_plan: { Args: { p_user_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
