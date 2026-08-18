@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Geist,
   Geist_Mono,
@@ -10,6 +10,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteHeader } from "@/components/site/site-header";
 import { ThemeProvider } from "@/components/site/theme-provider";
+import { SwRegister } from "@/components/site/sw-register";
 
 const geistSans = Geist({
   variable: "--font-sans-base",
@@ -44,6 +45,23 @@ export const metadata: Metadata = {
   },
   description:
     "Crea y gestiona eventos para tu comunidad tech o local. Páginas personalizables, RSVP, check-in con QR y emails. Plan Community gratis.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Nevetico",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#6366f1",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -63,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteHeader />
           <main className="flex-1 flex flex-col">{children}</main>
           <Toaster richColors position="top-center" />
+          <SwRegister />
         </ThemeProvider>
       </body>
     </html>
