@@ -212,7 +212,7 @@ function transactional(e: QueueRow): { subject: string; html: null; text: string
   return {
     subject: e.subject,
     html: null,
-    text: renderText(e.subject, e.payload as Record<string, unknown> | null),
+    text: renderText(e.template, e.subject, e.payload as Record<string, unknown> | null),
   };
 }
 
@@ -445,6 +445,7 @@ async function recordEvent(
 }
 
 function renderText(
+  template: string,
   subject: string,
   payload: Record<string, unknown> | null,
 ): string {
@@ -454,6 +455,32 @@ function renderText(
   const status = typeof p.status === "string" ? p.status : "";
   const calendarName =
     typeof p.calendar_name === "string" ? p.calendar_name : "";
+  const quantity = typeof p.quantity === "number" ? p.quantity : 1;
+  const orderId = typeof p.order_id === "string" ? p.order_id : "";
+
+  if (template === "ticket_confirmation") {
+    return [
+      `Tu entrada: ${title}`,
+      quantity > 1 ? `Entradas: ${quantity}` : "",
+      orderId ? `Order: ${orderId.slice(0, 8)}` : "",
+      "",
+      "Muestra este correo (o tu QR) en la entrada del evento.",
+      "Gracias por tu compra.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  if (template === "refund") {
+    return [
+      "Reembolso procesado",
+      orderId ? `Order: ${orderId.slice(0, 8)}` : "",
+      "",
+      "Tu pago ha sido reembolsado. Puede tardar 5-10 días hábiles en aparecer en tu cuenta.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
 
   if (status === "waitlist") {
     return `Te añadimos a la lista de espera para "${title}". Te avisaremos si hay lugar.`;
