@@ -414,6 +414,130 @@ export type Database = {
           },
         ]
       }
+      community_verifications: {
+        Row: {
+          calendar_id: string
+          form_data: Json
+          id: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          calendar_id: string
+          form_data?: Json
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          calendar_id?: string
+          form_data?: Json
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_verifications_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_verifications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_verifications_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          event_id: string
+          id: string
+          kind: string
+          max_uses: number | null
+          max_uses_per_user: number | null
+          updated_at: string
+          uses_count: number
+          valid_from: string | null
+          valid_until: string | null
+          value_cents: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          event_id: string
+          id?: string
+          kind: string
+          max_uses?: number | null
+          max_uses_per_user?: number | null
+          updated_at?: string
+          uses_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+          value_cents: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          event_id?: string
+          id?: string
+          kind?: string
+          max_uses?: number | null
+          max_uses_per_user?: number | null
+          updated_at?: string
+          uses_count?: number
+          valid_from?: string | null
+          valid_until?: string | null
+          value_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupons_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_campaigns: {
         Row: {
           blocks: Json
@@ -770,6 +894,101 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          coupon_id: string | null
+          created_at: string
+          currency: string
+          discount_cents: number
+          email: string
+          event_id: string
+          fee_cents: number
+          id: string
+          name: string | null
+          net_cents: number
+          paid_at: string | null
+          quantity: number
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          ticket_type_id: string
+          unit_price_cents: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          discount_cents?: number
+          email: string
+          event_id: string
+          fee_cents?: number
+          id?: string
+          name?: string | null
+          net_cents?: number
+          paid_at?: string | null
+          quantity?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          ticket_type_id: string
+          unit_price_cents: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          discount_cents?: number
+          email?: string
+          event_id?: string
+          fee_cents?: number
+          id?: string
+          name?: string | null
+          net_cents?: number
+          paid_at?: string | null
+          quantity?: number
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          ticket_type_id?: string
+          unit_price_cents?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_ticket_type_id_fkey"
+            columns: ["ticket_type_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_blocks: {
         Row: {
           config: Json
@@ -849,6 +1068,7 @@ export type Database = {
           event_id: string
           id: string
           name: string | null
+          order_id: string | null
           status: string
           ticket_type_id: string | null
           updated_at: string
@@ -861,6 +1081,7 @@ export type Database = {
           event_id: string
           id?: string
           name?: string | null
+          order_id?: string | null
           status?: string
           ticket_type_id?: string | null
           updated_at?: string
@@ -873,6 +1094,7 @@ export type Database = {
           event_id?: string
           id?: string
           name?: string | null
+          order_id?: string | null
           status?: string
           ticket_type_id?: string | null
           updated_at?: string
@@ -884,6 +1106,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
           {
@@ -1004,36 +1233,95 @@ export type Database = {
           },
         ]
       }
+      stripe_accounts: {
+        Row: {
+          charges_enabled: boolean
+          created_at: string
+          details_submitted: boolean
+          id: string
+          payouts_enabled: boolean
+          profile_id: string
+          stripe_account_id: string
+          updated_at: string
+        }
+        Insert: {
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          id?: string
+          payouts_enabled?: boolean
+          profile_id: string
+          stripe_account_id: string
+          updated_at?: string
+        }
+        Update: {
+          charges_enabled?: boolean
+          created_at?: string
+          details_submitted?: boolean
+          id?: string
+          payouts_enabled?: boolean
+          profile_id?: string
+          stripe_account_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stripe_accounts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ticket_types: {
         Row: {
+          active: boolean
           capacity: number | null
           created_at: string
           currency: string
+          description: string | null
           event_id: string
           id: string
+          max_per_order: number | null
+          min_per_order: number
           name: string
           order_idx: number
           price_cents: number
+          sale_end: string | null
+          sale_start: string | null
         }
         Insert: {
+          active?: boolean
           capacity?: number | null
           created_at?: string
           currency?: string
+          description?: string | null
           event_id: string
           id?: string
+          max_per_order?: number | null
+          min_per_order?: number
           name?: string
           order_idx?: number
           price_cents?: number
+          sale_end?: string | null
+          sale_start?: string | null
         }
         Update: {
+          active?: boolean
           capacity?: number | null
           created_at?: string
           currency?: string
+          description?: string | null
           event_id?: string
           id?: string
+          max_per_order?: number | null
+          min_per_order?: number
           name?: string
           order_idx?: number
           price_cents?: number
+          sale_end?: string | null
+          sale_start?: string | null
         }
         Relationships: [
           {
@@ -1175,6 +1463,27 @@ export type Database = {
         Returns: undefined
       }
       calendar_owner_plan: { Args: { p_cal_id: string }; Returns: string }
+      cancel_order: {
+        Args: { p_new_status?: string; p_order_id: string }
+        Returns: undefined
+      }
+      confirm_order_payment: {
+        Args: {
+          p_order_id: string
+          p_stripe_pi_id?: string
+          p_stripe_session_id?: string
+        }
+        Returns: {
+          calendar_id: string
+          email: string
+          event_id: string
+          event_slug: string
+          event_title: string
+          name: string
+          order_id: string
+          registration_ids: string[]
+        }[]
+      }
       create_calendar: {
         Args: { p_description?: string; p_name: string; p_slug: string }
         Returns: {
@@ -1243,6 +1552,44 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_order: {
+        Args: {
+          p_coupon_code?: string
+          p_email: string
+          p_event_id: string
+          p_name?: string
+          p_quantity?: number
+          p_ticket_type_id: string
+          p_user_id?: string
+        }
+        Returns: {
+          coupon_id: string | null
+          created_at: string
+          currency: string
+          discount_cents: number
+          email: string
+          event_id: string
+          fee_cents: number
+          id: string
+          name: string | null
+          net_cents: number
+          paid_at: string | null
+          quantity: number
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          ticket_type_id: string
+          unit_price_cents: number
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       event_organizer_plan: { Args: { p_ev_id: string }; Returns: string }
       event_visible_to_current_user: {
         Args: { ev_id: string }
@@ -1258,6 +1605,7 @@ export type Database = {
           p_email: string
           p_event_id: string
           p_name?: string
+          p_ticket_type_id?: string
           p_user_id?: string
         }
         Returns: {
@@ -1267,6 +1615,7 @@ export type Database = {
           event_id: string
           id: string
           name: string | null
+          order_id: string | null
           status: string
           ticket_type_id: string | null
           updated_at: string
