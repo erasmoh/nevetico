@@ -121,6 +121,15 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
   const theme = parseTheme(rawEvent.theme);
   const scope = themeScope(eventId);
 
+  // Si el usuario es organizador, cargar su ref_code para que sus shares
+  // se atribuyan (link con ?ref=).
+  let refCode: string | null = null;
+  if (isOrganizer && user) {
+    const { getOrCreateReferralCode } = await import("@/app/actions/referrals");
+    const res = await getOrCreateReferralCode();
+    refCode = res.code;
+  }
+
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
   const shareUrl =
     calendar && rawEvent.slug
@@ -270,6 +279,7 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
                   eventId={eventId}
                   url={shareUrl}
                   title={rawEvent.title}
+                  refCode={refCode}
                 />
               </div>
             ) : null}

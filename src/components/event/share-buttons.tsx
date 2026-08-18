@@ -49,21 +49,25 @@ export function ShareButtons({
   eventId,
   url,
   title,
+  refCode,
 }: {
   eventId: string;
   url: string;
   title: string;
+  refCode?: string | null;
 }) {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
+  // Si hay ref_code, lo añadimos a la URL compartida para atribuir registros.
+  const shareUrl = refCode ? `${url}?ref=${encodeURIComponent(refCode)}` : url;
   const shareText = `${title} — Únete en Nevetico`;
-  const encodedUrl = encodeURIComponent(url);
+  const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText);
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       toast.success("Link copiado");
       setTimeout(() => setCopied(false), 2000);
@@ -98,7 +102,7 @@ export function ShareButtons({
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title, text: shareText, url });
+        await navigator.share({ title, text: shareText, url: shareUrl });
       } catch {
         // Cancelado.
       }

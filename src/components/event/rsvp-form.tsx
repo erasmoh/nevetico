@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { rsvp, type RsvpFormState } from "@/app/actions/registrations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +18,13 @@ export function RsvpForm({
     rsvp,
     undefined,
   );
+  const params = useSearchParams();
+  const refCode = params.get("ref");
 
   return (
     <form action={action} className="flex flex-col gap-3" id="rsvp">
       <input type="hidden" name="event_id" value={eventId} />
+      {refCode && <input type="hidden" name="ref_code" value={refCode} />}
 
       {user ? (
         <>

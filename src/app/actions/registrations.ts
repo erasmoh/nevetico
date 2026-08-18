@@ -8,6 +8,7 @@ import {
   loadAutomationsByTrigger,
 } from "@/lib/email/automation-engine";
 import { triggerWebhooks } from "@/app/actions/api-settings";
+import { attributeReferral } from "@/app/actions/referrals";
 import { z } from "zod";
 
 const rsvpSchema = z.object({
@@ -43,6 +44,7 @@ export async function rsvp(
   // Email: si el usuario está logueado, usamos el suyo (prioridad); si no, el del form.
   const email = user?.email ?? parsed.data.email;
   const name = parsed.data.name ?? (user?.user_metadata?.display_name as string | undefined);
+  const refCode = (formData.get("ref_code") as string | null) || null;
 
   const { data: registration, error } = await supabase.rpc("register_for_event", {
     p_event_id: parsed.data.event_id,
@@ -142,6 +144,15 @@ export async function rsvp(
       });
     } catch (err) {
       console.error("[automations/webhooks] registration_created failed:", err);
+    }
+  }
+
+  // Atribuir referral si vino con ref_code (best-effort, no falla el RSVP).
+  if (refCode && registration?.id) {
+    try {
+      await attributeReferral(registration.id, parsed.data.event_id, refCode);
+    } catch (err) {
+      console.error("[referrals] attribution failed:", err);
     }
   }
 
