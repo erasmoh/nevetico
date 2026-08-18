@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PricingToggle } from "@/components/admin/pricing-toggle";
-import { ProfileAdminRow, EventAdminRow } from "@/components/admin/admin-rows";
+import { ProfileAdminRow, EventAdminRow, VerificationAdminRow } from "@/components/admin/admin-rows";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PLAN_LABELS } from "@/lib/entitlements";
 
@@ -56,6 +56,32 @@ export default async function AdminPage() {
       calendar_name: cal?.name ?? null,
       max_attendees_override: e.max_attendees_override,
       going_count: regs.filter((r) => r.status === "going").length,
+    };
+  });
+
+  // Verificaciones Community pendientes + recientes (para revisión del admin).
+  const { data: verifications } = await supabase
+    .from("community_verifications")
+    .select(
+      "id, status, form_data, notes, submitted_at, calendar:calendars(name)",
+    )
+    .order("submitted_at", { ascending: false })
+    .limit(50);
+
+  const verifRows = (verifications ?? []).map((v) => {
+    const cal = v.calendar as { name: string } | null;
+    const form = v.form_data as {
+      community_url?: string | null;
+      description?: string | null;
+    } | null;
+    return {
+      id: v.id,
+      calendar_name: cal?.name ?? "—",
+      status: v.status as "pending" | "approved" | "rejected" | "needs_info",
+      description: form?.description ?? null,
+      community_url: form?.community_url ?? null,
+      submitted_at: v.submitted_at,
+      notes: v.notes,
     };
   });
 
@@ -127,6 +153,37 @@ export default async function AdminPage() {
                 ))}
               </tbody>
             </table>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">
+              Verificaciones Community ({verifRows.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            {verifRows.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No hay verificaciones pendientes.
+              </p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs text-muted-foreground">
+                    <th className="px-3 py-2">Comunidad</th>
+                    <th className="px-3 py-2">Descripción</th>
+                    <th className="px-3 py-2">Estado</th>
+                    <th className="px-3 py-2">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {verifRows.map((v) => (
+                    <VerificationAdminRow key={v.id} verification={v} />
+                  ))}
+                </tbody>
+              </table>
+            )}
           </CardContent>
         </Card>
       </div>

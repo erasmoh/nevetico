@@ -134,3 +134,29 @@ export async function setPricingEnabled(
   revalidatePath("/dashboard");
   return { ok: true };
 }
+
+const reviewStatusSchema = z.enum(["approved", "rejected", "needs_info"]);
+
+/** Revisa una verificación de plan Community (approve/reject/needs_info). */
+export async function reviewCommunityVerification(
+  verificationId: string,
+  status: "approved" | "rejected" | "needs_info",
+  notes?: string,
+): Promise<AdminActionState> {
+  const parsed = reviewStatusSchema.safeParse(status);
+  if (!parsed.success) return { error: "Estado inválido." };
+  const adminId = await requireAdmin();
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("community_verifications")
+    .update({
+      status: parsed.data,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: adminId,
+      notes: notes ?? null,
+    })
+    .eq("id", verificationId);
+  if (error) return { error: error.message };
+  revalidatePath("/admin");
+  return { ok: true };
+}

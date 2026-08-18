@@ -58,6 +58,12 @@ export async function rsvp(
     if (msg.includes("event_not_found_or_not_published")) {
       return { error: "El evento no está disponible para registro." };
     }
+    if (msg.includes("paid_ticket_requires_checkout")) {
+      return { error: "Este evento requiere comprar una entrada." };
+    }
+    if (msg.includes("payments_disabled")) {
+      return { error: "Los pagos están deshabilitados temporalmente." };
+    }
     return { error: msg };
   }
 

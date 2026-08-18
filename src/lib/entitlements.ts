@@ -42,8 +42,12 @@ export type Entitlements = {
   sponsorTiersAllowed: boolean;
   /** Si permite configurar dominio propio. */
   customDomainAllowed: boolean;
-  /** Si permite tickets pagos (price_cents > 0). Bloqueado hasta Fase 4b. */
+  /** Si permite tickets pagos (price_cents > 0). El gating real lo controla
+   *  `paymentsEnabled()` (toggle global `pricing_enabled`); este flag es el
+   *  espejo del plan que la UI consulta para mostrar/ocultar opciones. */
   paidTicketsAllowed: boolean;
+  /** Fee por ticket pago en basis points (500 = 5%, 250 = 2.5%, 100 = 1%). */
+  ticketFeeBps: number;
 };
 
 export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
@@ -54,7 +58,8 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
     maxSponsorLogos: 1,
     sponsorTiersAllowed: false,
     customDomainAllowed: false,
-    paidTicketsAllowed: false,
+    paidTicketsAllowed: true,
+    ticketFeeBps: 500,
   },
   pro: {
     maxAttendeesPerEvent: null,
@@ -63,7 +68,8 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
     maxSponsorLogos: null,
     sponsorTiersAllowed: true,
     customDomainAllowed: true,
-    paidTicketsAllowed: false,
+    paidTicketsAllowed: true,
+    ticketFeeBps: 250,
   },
   business: {
     maxAttendeesPerEvent: null,
@@ -72,7 +78,8 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
     maxSponsorLogos: null,
     sponsorTiersAllowed: true,
     customDomainAllowed: true,
-    paidTicketsAllowed: false,
+    paidTicketsAllowed: true,
+    ticketFeeBps: 100,
   },
 };
 
@@ -136,4 +143,15 @@ export async function pricingEnabled(): Promise<boolean> {
     .maybeSingle();
   const v = data?.value as { pricing_enabled?: boolean } | null;
   return !!v?.pricing_enabled;
+}
+
+/**
+ * ¿Están los pagos (tickets pagos con Stripe) habilitados? Alias de
+ * `pricingEnabled()`: el toggle ÚNICO `pricing_enabled` controla tanto el
+ * gating por plan como los tickets pagos. Cuando está en false (default),
+ * no se pueden crear tickets pagos ni hacer checkout. Nombre separado para
+ * legibilidad en el código de pagos.
+ */
+export async function paymentsEnabled(): Promise<boolean> {
+  return pricingEnabled();
 }
