@@ -127,12 +127,52 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
       ? `${siteUrl}/c/${calendar.slug}/${rawEvent.slug}`
       : `${siteUrl}/e/${eventId}`;
 
+  // JSON-LD structured data para SEO (Event schema de schema.org).
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: rawEvent.title,
+    description: rawEvent.description ?? undefined,
+    startDate: rawEvent.starts_at,
+    endDate: rawEvent.ends_at ?? undefined,
+    url: shareUrl,
+    image: rawEvent.cover_url ?? undefined,
+    eventStatus:
+      rawEvent.status === "published"
+        ? "https://schema.org/EventScheduled"
+        : "https://schema.org/EventCancelled",
+    eventAttendanceMode:
+      rawEvent.location_type === "online"
+        ? "https://schema.org/OnlineEventAttendanceMode"
+        : rawEvent.location_type === "hybrid"
+          ? "https://schema.org/MixedEventAttendanceMode"
+          : "https://schema.org/OfflineEventAttendanceMode",
+    organizer: calendar
+      ? { "@type": "Organization", name: calendar.name, url: `${siteUrl}/c/${calendar.slug}` }
+      : { "@type": "Organization", name: "Nevetico" },
+    location:
+      rawEvent.location_type === "online"
+        ? {
+            "@type": "VirtualLocation",
+            url: rawEvent.online_url ?? shareUrl,
+          }
+        : {
+            "@type": "Place",
+            name: rawEvent.venue_name ?? undefined,
+            address: rawEvent.address ?? undefined,
+          },
+  };
+
   return (
     <div
       data-nvt={scope}
       className={`mx-auto w-full max-w-5xl px-4 py-8 font-sans ${themeModeClass(theme)}`}
     >
       <style>{themeCss(scope, theme)}</style>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {calendar ? (
         <p className="mb-4 text-sm text-muted-foreground">
           <Link href={`/c/${calendar.slug}`} className="hover:underline">
