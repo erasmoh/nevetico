@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatEventDate, statusLabel } from "@/lib/datetime";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, User, CreditCard } from "lucide-react";
+import { Plus, User, CreditCard, Upload } from "lucide-react";
 
 export const metadata = { title: "Mis eventos" };
 
@@ -69,14 +69,24 @@ export default async function DashboardPage() {
             Tus eventos personales y los de tus comunidades.
           </p>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          nativeButton={false}
-          render={<Link href="/dashboard/payments" />}
-        >
-          <CreditCard className="size-4" /> Pagos
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/dashboard/import" />}
+          >
+            <Upload className="size-4" /> Importar
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            nativeButton={false}
+            render={<Link href="/dashboard/payments" />}
+          >
+            <CreditCard className="size-4" /> Pagos
+          </Button>
+        </div>
       </div>
 
       {events.length === 0 ? (
