@@ -44,6 +44,8 @@ const eventSchema = z.object({
     .optional()
     .transform((v) => (v ? Number(v) : null))
     .pipe(z.number().int().positive().nullable()),
+  city: z.string().max(120).optional().or(z.literal("")),
+  topic: z.string().max(60).optional().or(z.literal("")),
   status: z.enum(["draft", "published"]),
 });
 
@@ -67,6 +69,8 @@ function parseEventForm(formData: FormData) {
     address: formData.get("address"),
     online_url: formData.get("online_url"),
     capacity: formData.get("capacity"),
+    city: formData.get("city"),
+    topic: formData.get("topic"),
     status: formData.get("status"),
   });
 }
@@ -128,6 +132,17 @@ export async function createEvent(
     return { error: error.message };
   }
 
+  // city/topic no están en la RPC create_event; los seteamos con un update.
+  if (d.city || d.topic) {
+    await supabase
+      .from("events")
+      .update({
+        city: d.city || null,
+        topic: d.topic || null,
+      })
+      .eq("id", event!.id);
+  }
+
   revalidatePath("/dashboard");
   redirect(`/dashboard/events/${event!.id}`);
 }
@@ -165,6 +180,8 @@ export async function updateEvent(
       address: d.address ?? null,
       online_url: d.online_url || null,
       capacity: d.capacity,
+      city: d.city || null,
+      topic: d.topic || null,
       status: d.status,
     })
     .eq("id", eventId);

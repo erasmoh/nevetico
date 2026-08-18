@@ -33,6 +33,8 @@ export function EventEditForm({
     location_type: string;
     venue_name: string | null;
     address: string | null;
+    city: string | null;
+    topic: string | null;
     online_url: string | null;
     capacity: number | null;
     status: string;
@@ -159,6 +161,17 @@ export function EventEditForm({
         <div className="flex flex-col gap-2">
           <Label htmlFor="address">Dirección</Label>
           <Input id="address" name="address" defaultValue={event.address ?? ""} />
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="city">Ciudad (opcional)</Label>
+          <Input id="city" name="city" defaultValue={event.city ?? ""} placeholder="Ciudad de México" />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="topic">Tema (opcional)</Label>
+          <Input id="topic" name="topic" defaultValue={event.topic ?? ""} placeholder="tech, design, startup…" />
         </div>
       </div>
 

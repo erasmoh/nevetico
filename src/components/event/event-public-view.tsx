@@ -121,11 +121,56 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
   const theme = parseTheme(rawEvent.theme);
   const scope = themeScope(eventId);
 
+  // Si el usuario es organizador, cargar su ref_code para que sus shares
+  // se atribuyan (link con ?ref=).
+  let refCode: string | null = null;
+  if (isOrganizer && user) {
+    const { getOrCreateReferralCode } = await import("@/app/actions/referrals");
+    const res = await getOrCreateReferralCode();
+    refCode = res.code;
+  }
+
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
   const shareUrl =
     calendar && rawEvent.slug
       ? `${siteUrl}/c/${calendar.slug}/${rawEvent.slug}`
       : `${siteUrl}/e/${eventId}`;
+
+  // JSON-LD structured data para SEO (Event schema de schema.org).
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: rawEvent.title,
+    description: rawEvent.description ?? undefined,
+    startDate: rawEvent.starts_at,
+    endDate: rawEvent.ends_at ?? undefined,
+    url: shareUrl,
+    image: rawEvent.cover_url ?? undefined,
+    eventStatus:
+      rawEvent.status === "published"
+        ? "https://schema.org/EventScheduled"
+        : "https://schema.org/EventCancelled",
+    eventAttendanceMode:
+      rawEvent.location_type === "online"
+        ? "https://schema.org/OnlineEventAttendanceMode"
+        : rawEvent.location_type === "hybrid"
+          ? "https://schema.org/MixedEventAttendanceMode"
+          : "https://schema.org/OfflineEventAttendanceMode",
+    organizer: calendar
+      ? { "@type": "Organization", name: calendar.name, url: `${siteUrl}/c/${calendar.slug}` }
+      : { "@type": "Organization", name: "Nevetico" },
+    location:
+      rawEvent.location_type === "online"
+        ? {
+            "@type": "VirtualLocation",
+            url: rawEvent.online_url ?? shareUrl,
+          }
+        : {
+            "@type": "Place",
+            name: rawEvent.venue_name ?? undefined,
+            address: rawEvent.address ?? undefined,
+          },
+  };
 
   return (
     <div
@@ -133,6 +178,10 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
       className={`mx-auto w-full max-w-5xl px-4 py-8 font-sans ${themeModeClass(theme)}`}
     >
       <style>{themeCss(scope, theme)}</style>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {calendar ? (
         <p className="mb-4 text-sm text-muted-foreground">
           <Link href={`/c/${calendar.slug}`} className="hover:underline">
@@ -230,6 +279,7 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
                   eventId={eventId}
                   url={shareUrl}
                   title={rawEvent.title}
+                  refCode={refCode}
                 />
               </div>
             ) : null}

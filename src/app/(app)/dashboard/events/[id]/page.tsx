@@ -61,6 +61,22 @@ export default async function EventDetailPage({
   const waitlist = regs.filter((r) => r.status === "waitlist").length;
   const checkedIn = regs.filter((r) => r.status === "checked_in").length;
 
+  // Top referrers (atribuciones de referral para este evento).
+  const { data: referrers } = await supabase
+    .from("referral_attributions")
+    .select("referrer_id, ref_code, registration_id")
+    .eq("event_id", id);
+
+  const referrerCounts = new Map<string, { code: string; count: number }>();
+  for (const r of referrers ?? []) {
+    const existing = referrerCounts.get(r.referrer_id);
+    if (existing) existing.count++;
+    else referrerCounts.set(r.referrer_id, { code: r.ref_code, count: 1 });
+  }
+  const topReferrers = [...referrerCounts.entries()]
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 5);
+
   const publicUrl =
     event.status === "published"
       ? calendar?.slug
@@ -185,6 +201,32 @@ export default async function EventDetailPage({
           )}
         </CardContent>
       </Card>
+
+      {topReferrers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Top referrers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-col gap-2">
+              {topReferrers.map(([referrerId, info], i) => (
+                <li
+                  key={referrerId}
+                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2 text-sm"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="text-muted-foreground">#{i + 1}</span>
+                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                      {info.code}
+                    </code>
+                  </span>
+                  <span className="font-medium">{info.count} registros</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -199,6 +199,23 @@ export function EventForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
+          <Label htmlFor="city">Ciudad (opcional)</Label>
+          <Input id="city" name="city" placeholder="Ciudad de México" />
+          <p className="text-xs text-muted-foreground">
+            Aparece en el explorador y filtros de /explore.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="topic">Tema (opcional)</Label>
+          <Input id="topic" name="topic" placeholder="tech, design, startup…" />
+          <p className="text-xs text-muted-foreground">
+            Categoría para agrupar eventos similares.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
           <Label htmlFor="online_url">URL en línea (opcional)</Label>
           <Input
             id="online_url"

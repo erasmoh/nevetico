@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import {
   Geist,
   Geist_Mono,
@@ -10,6 +10,9 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteHeader } from "@/components/site/site-header";
 import { ThemeProvider } from "@/components/site/theme-provider";
+import { SwRegister } from "@/components/site/sw-register";
+import { I18nProvider } from "@/components/site/locale-context";
+import { getLocale } from "@/lib/i18n/server";
 
 const geistSans = Geist({
   variable: "--font-sans-base",
@@ -44,12 +47,30 @@ export const metadata: Metadata = {
   },
   description:
     "Crea y gestiona eventos para tu comunidad tech o local. Páginas personalizables, RSVP, check-in con QR y emails. Plan Community gratis.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Nevetico",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const viewport: Viewport = {
+  themeColor: "#6366f1",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
   return (
     <html
-      lang="es"
+      lang={locale}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${playfair.variable} ${nunito.variable} h-full antialiased`}
     >
@@ -60,9 +81,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <SiteHeader />
-          <main className="flex-1 flex flex-col">{children}</main>
-          <Toaster richColors position="top-center" />
+          <I18nProvider locale={locale}>
+            <SiteHeader />
+            <main className="flex-1 flex flex-col">{children}</main>
+            <Toaster richColors position="top-center" />
+            <SwRegister />
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

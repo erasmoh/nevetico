@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Copy, Share2 } from "lucide-react";
+import { useT } from "@/components/site/locale-context";
 
 /**
  * Botones de compartir para la página pública del evento.
@@ -49,26 +50,31 @@ export function ShareButtons({
   eventId,
   url,
   title,
+  refCode,
 }: {
   eventId: string;
   url: string;
   title: string;
+  refCode?: string | null;
 }) {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const t = useT();
 
+  // Si hay ref_code, lo añadimos a la URL compartida para atribuir registros.
+  const shareUrl = refCode ? `${url}?ref=${encodeURIComponent(refCode)}` : url;
   const shareText = `${title} — Únete en Nevetico`;
-  const encodedUrl = encodeURIComponent(url);
+  const encodedUrl = encodeURIComponent(shareUrl);
   const encodedText = encodeURIComponent(shareText);
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success("Link copiado");
+      toast.success(t("share.copied"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("No se pudo copiar");
+      toast.error(t("share.copy.fail"));
     }
   };
 
@@ -86,10 +92,10 @@ export function ShareButtons({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
-      await navigator.clipboard.writeText(url).catch(() => {});
-      toast.success("Imagen descargada y link copiado. Súbela a tu story de IG.");
+      await navigator.clipboard.writeText(shareUrl).catch(() => {});
+      toast.success(t("share.story.success"));
     } catch {
-      toast.error("No se pudo descargar la imagen");
+      toast.error(t("share.copy.fail"));
     } finally {
       setDownloading(false);
     }
@@ -98,7 +104,7 @@ export function ShareButtons({
   const nativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title, text: shareText, url });
+        await navigator.share({ title, text: shareText, url: shareUrl });
       } catch {
         // Cancelado.
       }
@@ -109,7 +115,7 @@ export function ShareButtons({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-medium text-muted-foreground">Compartir</p>
+      <p className="text-xs font-medium text-muted-foreground">{t("share.title")}</p>
       <div className="flex flex-wrap gap-1.5">
         <a
           href={`https://wa.me/?text=${encodedText}%20${encodedUrl}`}
@@ -164,7 +170,7 @@ export function ShareButtons({
         onClick={downloadStory}
       >
         <InstagramIcon />
-        {downloading ? "Generando…" : "Imagen para IG Stories"}
+        {downloading ? t("share.story.generating") : t("share.story")}
       </Button>
     </div>
   );

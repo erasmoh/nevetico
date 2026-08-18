@@ -2,13 +2,16 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { UserMenu } from "./user-menu";
 import { ThemeToggle } from "./theme-toggle";
+import { LocaleSwitcher } from "./locale-switcher";
 import { Button } from "@/components/ui/button";
+import { getLocale, t } from "@/lib/i18n/server";
 
 export async function SiteHeader() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const locale = await getLocale();
 
   let displayName: string | null = null;
   if (user) {
@@ -31,12 +34,19 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-2">
+          <Link
+            href="/explore"
+            className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline-block"
+          >
+            {await t("nav.explore")}
+          </Link>
+          <LocaleSwitcher current={locale} />
           <ThemeToggle />
           {user ? (
             <UserMenu displayName={displayName ?? user.email ?? "Cuenta"} email={user.email ?? ""} />
           ) : (
             <Button size="sm" nativeButton={false} render={<Link href="/login" />}>
-              Acceder
+              {await t("nav.login")}
             </Button>
           )}
         </nav>
