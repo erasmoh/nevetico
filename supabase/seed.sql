@@ -52,7 +52,7 @@ values (
 
 -- Evento publicado
 insert into public.events (
-  id, calendar_id, slug, title, description, starts_at, ends_at, timezone,
+  id, calendar_id, slug, title, description, cover_url, starts_at, ends_at, timezone,
   location_type, venue_name, address, capacity, status, created_by
 ) values (
   '00000000-0000-0000-0000-000000000100',
@@ -60,6 +60,7 @@ insert into public.events (
   'meetup-agosto-2026',
   'Tech Meetup CDMX — Agosto 2026',
   'Una noche de charlas sobre Next.js 16, Supabase y IA. Networking + pizza.',
+  'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1200&h=1200&fit=crop',
   now() + interval '7 days',
   now() + interval '7 days 3 hours',
   'America/Mexico_City',
