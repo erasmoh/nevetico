@@ -31,6 +31,12 @@ export async function SiteHeader() {
         </Link>
 
         <nav className="flex items-center gap-2">
+          <Link
+            href="/explore"
+            className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline-block"
+          >
+            Explorar
+          </Link>
           <ThemeToggle />
           {user ? (
             <UserMenu displayName={displayName ?? user.email ?? "Cuenta"} email={user.email ?? ""} />

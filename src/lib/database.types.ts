@@ -815,6 +815,7 @@ export type Database = {
           address: string | null
           calendar_id: string | null
           capacity: number | null
+          city: string | null
           cover_url: string | null
           created_at: string
           created_by: string | null
@@ -830,6 +831,7 @@ export type Database = {
           theme: Json
           timezone: string
           title: string
+          topic: string | null
           updated_at: string
           venue_name: string | null
         }
@@ -837,6 +839,7 @@ export type Database = {
           address?: string | null
           calendar_id?: string | null
           capacity?: number | null
+          city?: string | null
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -852,6 +855,7 @@ export type Database = {
           theme?: Json
           timezone?: string
           title: string
+          topic?: string | null
           updated_at?: string
           venue_name?: string | null
         }
@@ -859,6 +863,7 @@ export type Database = {
           address?: string | null
           calendar_id?: string | null
           capacity?: number | null
+          city?: string | null
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -874,6 +879,7 @@ export type Database = {
           theme?: Json
           timezone?: string
           title?: string
+          topic?: string | null
           updated_at?: string
           venue_name?: string | null
         }
@@ -888,6 +894,60 @@ export type Database = {
           {
             foreignKeyName: "events_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      import_jobs: {
+        Row: {
+          calendar_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json
+          profile_id: string
+          result: Json
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          calendar_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          profile_id: string
+          result?: Json
+          source: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          calendar_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json
+          profile_id?: string
+          result?: Json
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "import_jobs_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "import_jobs_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1059,6 +1119,84 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      referral_attributions: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          ref_code: string
+          referrer_id: string
+          registration_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          ref_code: string
+          referrer_id: string
+          registration_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          ref_code?: string
+          referrer_id?: string
+          registration_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_attributions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_attributions_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_attributions_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: true
+            referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registrations: {
         Row: {
@@ -1527,6 +1665,7 @@ export type Database = {
           address: string | null
           calendar_id: string | null
           capacity: number | null
+          city: string | null
           cover_url: string | null
           created_at: string
           created_by: string | null
@@ -1542,6 +1681,7 @@ export type Database = {
           theme: Json
           timezone: string
           title: string
+          topic: string | null
           updated_at: string
           venue_name: string | null
         }
