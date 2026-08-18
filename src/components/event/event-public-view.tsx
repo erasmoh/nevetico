@@ -6,8 +6,10 @@ import { EventBlocks, type EventPublic } from "@/components/event/blocks";
 import { RsvpForm } from "@/components/event/rsvp-form";
 import { RegistrationStatus } from "@/components/event/registration-status";
 import { ShareButtons } from "@/components/event/share-buttons";
+import { TicketCheckout } from "@/components/event/ticket-checkout";
 import { formatEventDate } from "@/lib/datetime";
 import { parseTheme, themeCss, themeModeClass, themeScope } from "@/lib/theme";
+import { paymentsEnabled } from "@/lib/entitlements";
 
 /**
  * Vista pública de un evento (comunitario o personal). Recibe el id validado
@@ -77,6 +79,23 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
     .eq("event_id", eventId)
     .eq("status", "going");
   const goingCount = count ?? 0;
+
+  // Cargar tickets para decidir si mostrar RSVP gratis o checkout de pago.
+  const { data: ticketTypes } = await supabase
+    .from("ticket_types")
+    .select(
+      "id, name, price_cents, currency, capacity, description, active, min_per_order, max_per_order, sale_start, sale_end",
+    )
+    .eq("event_id", eventId)
+    .order("order_idx", { ascending: true });
+
+  const enabled = await paymentsEnabled();
+  const paidTickets = (ticketTypes ?? []).filter(
+    (t) => t.price_cents > 0 && t.active,
+  );
+  // Si hay tickets pagos y el pricing está encendido, mostramos checkout.
+  // Si no, todo fluye como RSVP gratis (los tickets pagos se ignoran).
+  const showCheckout = enabled && paidTickets.length > 0;
 
   const eventPublic: EventPublic = {
     id: eventId,
@@ -177,6 +196,21 @@ export async function EventPublicView({ eventId }: { eventId: string }) {
                   eventId={eventId}
                   status={myRegistration.status}
                   qrDataUrl={qrDataUrl}
+                />
+              ) : showCheckout ? (
+                <TicketCheckout
+                  eventId={eventId}
+                  tickets={paidTickets.map((t) => ({
+                    id: t.id,
+                    name: t.name,
+                    price_cents: t.price_cents,
+                    currency: t.currency,
+                    capacity: t.capacity,
+                    description: t.description,
+                    min_per_order: t.min_per_order,
+                    max_per_order: t.max_per_order,
+                  }))}
+                  user={userProfile}
                 />
               ) : isFull ? (
                 <div className="rounded-md border border-border bg-muted/40 px-3 py-3 text-sm">
