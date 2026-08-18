@@ -11,7 +11,9 @@ export type EmailTemplate =
   | "thankyou"
   | "welcome"
   | "campaign"
-  | "automation";
+  | "automation"
+  | "ticket_confirmation"
+  | "refund";
 
 export type EnqueueEmailArgs = {
   template: EmailTemplate;
