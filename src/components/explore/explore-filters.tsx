@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useT } from "@/components/site/locale-context";
 
 /**
  * Filtros de /explore. Cada cambio actualiza los searchParams (push, no
@@ -34,6 +35,7 @@ export function ExploreFilters({
   const router = useRouter();
   const params = useSearchParams();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t = useT();
 
   const update = useCallback(
     (key: string, value: string) => {
@@ -56,7 +58,7 @@ export function ExploreFilters({
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <Input
-        placeholder="Buscar evento…"
+        placeholder={t("explore.search")}
         defaultValue={currentQuery}
         onChange={(e) => {
           const v = e.target.value;
@@ -69,10 +71,10 @@ export function ExploreFilters({
         onValueChange={(v) => update("city", v ?? "all")}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Ciudad" />
+          <SelectValue placeholder={t("explore.city")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todas las ciudades</SelectItem>
+          <SelectItem value="all">{t("explore.city.all")}</SelectItem>
           {cities.map((c) => (
             <SelectItem key={c} value={c}>
               {c}
@@ -85,13 +87,13 @@ export function ExploreFilters({
         onValueChange={(v) => update("topic", v ?? "all")}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Tema" />
+          <SelectValue placeholder={t("explore.topic")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Todos los temas</SelectItem>
-          {topics.map((t) => (
-            <SelectItem key={t} value={t}>
-              {t}
+          <SelectItem value="all">{t("explore.topic.all")}</SelectItem>
+          {topics.map((tp) => (
+            <SelectItem key={tp} value={tp}>
+              {tp}
             </SelectItem>
           ))}
         </SelectContent>
@@ -101,14 +103,14 @@ export function ExploreFilters({
         onValueChange={(v) => update("when", v ?? "all")}
       >
         <SelectTrigger>
-          <SelectValue placeholder="Cuándo" />
+          <SelectValue placeholder={t("explore.when")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Cualquier fecha</SelectItem>
-          <SelectItem value="today">Hoy</SelectItem>
-          <SelectItem value="week">Esta semana</SelectItem>
-          <SelectItem value="month">Este mes</SelectItem>
-          <SelectItem value="past">Pasados</SelectItem>
+          <SelectItem value="all">{t("explore.when.all")}</SelectItem>
+          <SelectItem value="today">{t("explore.when.today")}</SelectItem>
+          <SelectItem value="week">{t("explore.when.week")}</SelectItem>
+          <SelectItem value="month">{t("explore.when.month")}</SelectItem>
+          <SelectItem value="past">{t("explore.when.past")}</SelectItem>
         </SelectContent>
       </Select>
     </div>

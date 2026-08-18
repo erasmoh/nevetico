@@ -5,6 +5,7 @@ import { formatEventDate } from "@/lib/datetime";
 import { ExploreFilters } from "@/components/explore/explore-filters";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getI18n } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "Explorar eventos",
@@ -16,6 +17,7 @@ export default async function ExplorePage({
   searchParams,
 }: PageProps<"/explore">) {
   const sp = await searchParams;
+  const { t } = await getI18n();
   const q = (sp.q as string | undefined)?.trim() ?? "";
   const city = (sp.city as string | undefined) ?? "";
   const topic = (sp.topic as string | undefined) ?? "";
@@ -108,10 +110,10 @@ export default async function ExplorePage({
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <header className="mb-6">
         <h1 className="text-3xl font-semibold tracking-tight">
-          Explorar eventos
+          {t("explore.title")}
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Meetups, conferencias y workshops de comunidades tech.
+          {t("explore.subtitle")}
         </p>
       </header>
 
@@ -129,7 +131,7 @@ export default async function ExplorePage({
       {(events ?? []).length === 0 ? (
         <div className="rounded-lg border border-border p-12 text-center">
           <p className="text-muted-foreground">
-            No se encontraron eventos con esos filtros.
+            {t("explore.empty")}
           </p>
           <Button
             className="mt-4"
@@ -137,7 +139,7 @@ export default async function ExplorePage({
             nativeButton={false}
             render={<Link href="/explore" />}
           >
-            Limpiar filtros
+            {t("explore.clear")}
           </Button>
         </div>
       ) : (
@@ -174,10 +176,10 @@ export default async function ExplorePage({
                       )}
                       <Badge variant="outline">
                         {e.location_type === "online"
-                          ? "En línea"
+                          ? t("explore.loc.online")
                           : e.location_type === "hybrid"
-                            ? "Híbrido"
-                            : "Presencial"}
+                            ? t("explore.loc.hybrid")
+                            : t("explore.loc.inperson")}
                       </Badge>
                     </div>
                     <h3 className="font-medium leading-tight group-hover:text-primary">
@@ -210,11 +212,11 @@ export default async function ExplorePage({
                     />
                   }
                 >
-                  ← Anterior
+                  {t("explore.prev")}
                 </Button>
               )}
               <span className="text-sm text-muted-foreground">
-                Página {page} de {totalPages}
+                {t("explore.page")} {page} {t("explore.page.of")} {totalPages}
               </span>
               {page < totalPages && (
                 <Button
@@ -227,7 +229,7 @@ export default async function ExplorePage({
                     />
                   }
                 >
-                  Siguiente →
+                  {t("explore.next")}
                 </Button>
               )}
             </div>

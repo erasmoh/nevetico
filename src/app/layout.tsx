@@ -11,6 +11,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { SiteHeader } from "@/components/site/site-header";
 import { ThemeProvider } from "@/components/site/theme-provider";
 import { SwRegister } from "@/components/site/sw-register";
+import { I18nProvider } from "@/components/site/locale-context";
+import { getLocale } from "@/lib/i18n/server";
 
 const geistSans = Geist({
   variable: "--font-sans-base",
@@ -64,10 +66,11 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
   return (
     <html
-      lang="es"
+      lang={locale}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${playfair.variable} ${nunito.variable} h-full antialiased`}
     >
@@ -78,10 +81,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          <SiteHeader />
-          <main className="flex-1 flex flex-col">{children}</main>
-          <Toaster richColors position="top-center" />
-          <SwRegister />
+          <I18nProvider locale={locale}>
+            <SiteHeader />
+            <main className="flex-1 flex flex-col">{children}</main>
+            <Toaster richColors position="top-center" />
+            <SwRegister />
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>
