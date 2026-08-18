@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { BrandingForm } from "@/components/calendars/branding-form";
+import { VerificationForm } from "@/components/payments/verification-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +18,7 @@ import {
   PLAN_LABELS,
   type Plan,
 } from "@/lib/entitlements";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, BadgeCheck } from "lucide-react";
 
 export const metadata = { title: "Ajustes de la comunidad" };
 
@@ -58,6 +59,25 @@ export default async function CalendarSettingsPage({
   const plan = await calendarOwnerPlan(supabase, calendar.id);
   const ent = entitlementsFor(plan);
   const isCommunity = plan === "community";
+
+  // Verificación Community (solo aplica si el plan es community).
+  let verification: {
+    id: string;
+    status: "pending" | "approved" | "rejected" | "needs_info";
+    form_data: { community_url?: string | null; description?: string | null } | null;
+    notes: string | null;
+    submitted_at: string;
+  } | null = null;
+  if (isCommunity) {
+    const { data: v } = await supabase
+      .from("community_verifications")
+      .select("id, status, form_data, notes, submitted_at")
+      .eq("calendar_id", calendar.id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    verification = v as typeof verification;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -128,6 +148,26 @@ export default async function CalendarSettingsPage({
           </ul>
         </CardContent>
       </Card>
+
+      {isCommunity && (
+        <Card className="mx-auto w-full max-w-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BadgeCheck className="size-5" /> Verificación Community
+            </CardTitle>
+            <CardDescription>
+              El plan Community es gratuito para comunidades sin fines
+              comerciales. Verifica tu comunidad para llevar el sello público.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <VerificationForm
+              calendarId={calendar.id}
+              verification={verification}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="mx-auto w-full max-w-2xl">
         <CardHeader>
